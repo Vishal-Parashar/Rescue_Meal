@@ -45,9 +45,18 @@ function formatInventoryDate(value) {
     return Number.isNaN(date.getTime()) ? "Date unavailable" : date.toLocaleDateString();
 }
 
+function requestPickup(item) {
+    document.querySelector("#foodDescription").value = item.item_name;
+    document.querySelector("#foodCategory").value = item.category.toLowerCase().includes("raw") ? "raw" : "packaged";
+    document.querySelector("#quantity").value = `${item.quantity} ${item.unit}`;
+    document.querySelector("#timestamp").value = "Ready for pickup";
+    document.querySelector(".upload-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+    window.alert("Pickup details added to the surplus form. Review them and submit to request pickup.");
+}
+
 function renderBatches(batches) {
     if (!batches.length) {
-        batchesTable.innerHTML = '<tr><td colspan="6">No food batches uploaded yet.</td></tr>';
+        batchesTable.innerHTML = '<tr><td colspan="7">No food batches uploaded yet.</td></tr>';
         return;
     }
 
@@ -55,6 +64,7 @@ function renderBatches(batches) {
         <tr>
             <td><strong>#${escapeHtml(batch.batch_code)}</strong></td>
             <td>${escapeHtml(batch.food_description)}</td>
+            <td>${escapeHtml(batch.waste_type || "Edible")}</td>
             <td>${escapeHtml(batch.quantity)}</td>
             <td><span class="status ${batch.status === "Delivered" ? "status-green" : "status-orange"}">${escapeHtml(batch.status)}</span></td>
             <td><input type="text" class="otp-input" value="${escapeHtml(batch.release_otp)}" maxlength="4" readonly></td>
@@ -66,6 +76,7 @@ function renderBatches(batches) {
 }
 
 function renderInventory(items) {
+    window.producerInventory = items;
     if (!items.length) {
             inventoryTable.innerHTML = '<tr><td colspan="6">No inventory items added yet.</td></tr>';
             return;
@@ -89,7 +100,7 @@ function renderInventory(items) {
                     <td>${escapeHtml(item.barcode || "—")}</td>
                     <td>${escapeHtml(item.quantity)} ${escapeHtml(item.unit)}</td>
                     <td>${formatInventoryDate(item.expires_on)}</td>
-                    <td><button type="button" class="delete-batch-button delete-inventory" data-inventory-id="${item.id}">Delete</button></td>
+                    <td><button type="button" class="pickup-button" data-pickup-item="${item.id}">Request pickup</button> <button type="button" class="delete-batch-button delete-inventory" data-inventory-id="${item.id}">Delete</button></td>
                 </tr>`).join("")}
     `).join("");
 }
@@ -168,6 +179,7 @@ surplusForm.addEventListener("submit", async (event) => {
             body: JSON.stringify({
                 foodDescription: document.querySelector("#foodDescription").value,
                 foodCategory: document.querySelector("#foodCategory").value,
+                wasteType: document.querySelector("#wasteType").value,
                 quantity: document.querySelector("#quantity").value,
                 preparationTime: document.querySelector("#timestamp").value,
             }),
@@ -265,9 +277,33 @@ inventoryForm.addEventListener("submit", async (event) => {
 
 document.addEventListener("click", (event) => {
     if (event.target.classList.contains("otp-input")) {
-        window.alert("Disclose the OTP only after the driver arrives and presents insulated food carriers.");
+        window.alert("Share this pickup OTP with the assigned driver only when the driver arrives to collect the batch.");
     }
 });
+
+document.querySelector("#simulate-sensor").addEventListener("click", () => {
+    const temperature = 2 + Math.random() * 5;
+    const humidity = 45 + Math.random() * 20;
+    const safe = temperature <= 5 && humidity <= 65;
+    document.querySelector("#storage-temperature").textContent = `${temperature.toFixed(1)}°C`;
+    document.querySelector("#storage-humidity").textContent = `${Math.round(humidity)}%`;
+    document.querySelector("#temperature-status").textContent = temperature <= 5 ? "Within cold-storage range" : "Check cooling";
+    document.querySelector("#humidity-status").textContent = humidity <= 65 ? "Within target range" : "Ventilation needed";
+    document.querySelector("#storage-health").textContent = safe
+        ? "Storage health: Good. Cooling is operating within the target range."
+        : "Storage health: Attention needed. Check the cooling or ventilation system.";
+    document.querySelector("#storage-health").classList.toggle("storage-warning", !safe);
+});
+
+function updateMaterialImage(event) {
+    const file = event.target.files[0];
+    document.querySelector("#cv-result").textContent = file
+        ? `${file.name} is ready for computer-vision analysis. Confirm the detected details before adding stock.`
+        : "No material image selected.";
+}
+
+document.querySelector("#material-image").addEventListener("change", updateMaterialImage);
+document.querySelector("#material-camera").addEventListener("change", updateMaterialImage);
 
 batchesTable.addEventListener("click", async (event) => {
     const button = event.target.closest(".delete-batch-button");
@@ -284,6 +320,12 @@ batchesTable.addEventListener("click", async (event) => {
 });
 
 inventoryTable.addEventListener("click", async (event) => {
+    const pickupButton = event.target.closest(".pickup-button");
+    if (pickupButton) {
+        const item = window.producerInventory.find((entry) => String(entry.id) === pickupButton.dataset.pickupItem);
+        if (item) requestPickup(item);
+        return;
+    }
     const button = event.target.closest(".delete-inventory");
     if (!button || !window.confirm("Delete this inventory item?")) return;
     button.disabled = true;

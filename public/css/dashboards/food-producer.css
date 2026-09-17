@@ -4,6 +4,7 @@
 
 body {
   margin: 0;
+  overflow-x: hidden;
   color: #19352d;
   background: #f7f8f4;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -444,7 +445,44 @@ input:focus {
   font-size: 0.8rem;
 }
 
+@media (max-width: 900px) {
+  .dashboard-card {
+    padding: 2rem;
+  }
+  .data-table,
+  .dashboard-page table {
+    min-width: 38rem;
+  }
+}
+@media (max-width: 1024px) {
+  .admin-dashboard .dashboard-container,
+  .delivery-partner-dashboard .dashboard-container,
+  .food-producer-dashboard .dashboard,
+  .ngo-dashboard .dashboard-shell {
+    width: min(100% - 2rem, 76rem);
+  }
+}
 @media (max-width: 760px) {
+  .dashboard-page {
+    padding: 1rem;
+  }
+  .dashboard-card {
+    padding: 1.25rem;
+  }
+  .top-nav,
+  .dashboard-header {
+    gap: 1rem;
+  }
+  .header-profile-panel {
+    right: 0;
+    max-width: calc(100vw - 2rem);
+  }
+  input,
+  select,
+  textarea,
+  button {
+    font-size: 1rem;
+  }
   .food-producer-dashboard .summary-grid {
     padding-top: 1.5rem;
   }
@@ -679,6 +717,113 @@ input:focus {
 .food-producer-dashboard .inventory-panel {
   margin-top: 1.25rem;
 }
+.food-producer-dashboard .producer-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+.food-producer-dashboard .producer-tool h2 {
+  margin-bottom: 0.6rem;
+}
+.food-producer-dashboard .tool-intro {
+  min-height: 2.7rem;
+  color: #70827b;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.food-producer-dashboard .sensor-reading-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+}
+.food-producer-dashboard .sensor-reading {
+  padding: 0.8rem;
+  border: 1px solid #dce5df;
+  border-radius: 0.65rem;
+  background: #f8fbf8;
+}
+.food-producer-dashboard .sensor-reading span,
+.food-producer-dashboard .sensor-reading small {
+  display: block;
+  color: #70827b;
+  font-size: 0.7rem;
+}
+.food-producer-dashboard .sensor-reading strong {
+  display: block;
+  margin: 0.35rem 0;
+  color: #19352d;
+  font-size: 1.4rem;
+}
+.food-producer-dashboard .storage-health,
+.food-producer-dashboard .cv-result {
+  padding: 0.75rem;
+  color: #70827b;
+  background: #fff9ec;
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+.food-producer-dashboard .storage-warning {
+  color: #8a5b20;
+  background: #fff3d9;
+}
+.food-producer-dashboard .tool-button {
+  margin-top: 1rem;
+}
+.food-producer-dashboard .upload-dropzone {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 1.25rem 0;
+  padding: 1.25rem;
+  border: 1px dashed #2f7d61;
+  border-radius: 0.7rem;
+  color: #205c48;
+  background: #f5fbf5;
+  cursor: pointer;
+}
+.food-producer-dashboard .upload-dropzone span {
+  color: #70827b;
+  font-size: 0.76rem;
+}
+.food-producer-dashboard .upload-dropzone input {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.food-producer-dashboard .capture-photo-button {
+  display: inline-block;
+  width: fit-content;
+  margin-bottom: 1rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid #2f7d61;
+  border-radius: 0.55rem;
+  color: #205c48;
+  background: #f5fbf5;
+  font-size: 0.8rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+.food-producer-dashboard .capture-photo-button input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+.food-producer-dashboard .pickup-button {
+  margin-right: 0.35rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid #2f7d61;
+  border-radius: 0.45rem;
+  color: #205c48;
+  background: #f5fbf5;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 750;
+  cursor: pointer;
+}
 .food-producer-dashboard .inventory-heading {
   display: flex;
   justify-content: space-between;
@@ -747,7 +892,7 @@ input:focus {
   object-fit: cover;
   background: #17251f;
 }
-@media (max-width: 800px) {
+@media (max-width: 1024px) {
   .food-producer-dashboard .topbar {
     align-items: flex-start;
     flex-direction: column;
@@ -759,11 +904,40 @@ input:focus {
   }
   .food-producer-dashboard .summary-grid,
   .food-producer-dashboard .main-grid,
-  .food-producer-dashboard .inventory-form {
+  .food-producer-dashboard .inventory-form,
+  .food-producer-dashboard .producer-tools-grid {
     grid-template-columns: 1fr;
   }
   .food-producer-dashboard .dashboard {
     width: min(100% - 2rem, 76rem);
+  }
+  .food-producer-dashboard .panel {
+    padding: 1rem;
+  }
+  .food-producer-dashboard .inventory-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .food-producer-dashboard .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .food-producer-dashboard table {
+    min-width: 38rem;
+  }
+}
+@media (max-width: 480px) {
+  .food-producer-dashboard .summary-grid {
+    gap: 0.75rem;
+  }
+  .food-producer-dashboard .summary-card {
+    padding: 1rem;
+  }
+  .food-producer-dashboard .card-value {
+    font-size: 1.25rem;
+  }
+  .food-producer-dashboard .inventory-form {
+    gap: 0.85rem;
   }
 }
 

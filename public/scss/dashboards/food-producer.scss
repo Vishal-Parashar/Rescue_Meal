@@ -244,6 +244,129 @@
         margin-top: 1.25rem;
     }
 
+    .producer-tools-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .producer-tool h2 {
+        margin-bottom: .6rem;
+    }
+
+    .tool-intro {
+        min-height: 2.7rem;
+        color: $muted;
+        font-size: .8rem;
+        line-height: 1.5;
+    }
+
+    .sensor-reading-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: .75rem;
+        margin: 1.25rem 0;
+    }
+
+    .sensor-reading {
+        padding: .8rem;
+        border: 1px solid $line;
+        border-radius: .65rem;
+        background: #f8fbf8;
+    }
+
+    .sensor-reading span,
+    .sensor-reading small {
+        display: block;
+        color: $muted;
+        font-size: .7rem;
+    }
+
+    .sensor-reading strong {
+        display: block;
+        margin: .35rem 0;
+        color: $ink;
+        font-size: 1.4rem;
+    }
+
+    .storage-health,
+    .cv-result {
+        padding: .75rem;
+        color: $muted;
+        background: #fff9ec;
+        font-size: .76rem;
+        line-height: 1.5;
+    }
+
+    .storage-warning {
+        color: #8a5b20;
+        background: #fff3d9;
+    }
+
+    .tool-button {
+        margin-top: 1rem;
+    }
+
+    .upload-dropzone {
+        display: flex;
+        flex-direction: column;
+        gap: .35rem;
+        margin: 1.25rem 0;
+        padding: 1.25rem;
+        border: 1px dashed $green;
+        border-radius: .7rem;
+        color: $green-dark;
+        background: #f5fbf5;
+        cursor: pointer;
+    }
+
+    .upload-dropzone span {
+        color: $muted;
+        font-size: .76rem;
+    }
+
+    .upload-dropzone input {
+        padding: 0;
+        border: 0;
+        background: transparent;
+    }
+
+    .capture-photo-button {
+        display: inline-block;
+        width: fit-content;
+        margin-bottom: 1rem;
+        padding: .65rem .85rem;
+        border: 1px solid $green;
+        border-radius: .55rem;
+        color: $green-dark;
+        background: #f5fbf5;
+        font-size: .8rem;
+        font-weight: 750;
+        cursor: pointer;
+    }
+
+    .capture-photo-button input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+    }
+
+    .pickup-button {
+        margin-right: .35rem;
+        padding: .45rem .65rem;
+        border: 1px solid $green;
+        border-radius: .45rem;
+        color: $green-dark;
+        background: #f5fbf5;
+        font: inherit;
+        font-size: .72rem;
+        font-weight: 750;
+        cursor: pointer;
+    }
+
     .inventory-heading {
         display: flex;
         justify-content: space-between;
@@ -323,7 +446,7 @@
         background: #17251f;
     }
 
-    @media (max-width: 800px) {
+    @media (max-width: 1024px) {
         .topbar {
             align-items: flex-start;
             flex-direction: column;
@@ -337,12 +460,49 @@
 
         .summary-grid,
         .main-grid,
-        .inventory-form {
+        .inventory-form,
+        .producer-tools-grid {
             grid-template-columns: 1fr;
         }
 
         .dashboard {
             width: min(100% - 2rem, 76rem);
+        }
+
+        .panel {
+            padding: 1rem;
+        }
+
+        .inventory-heading {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            min-width: 38rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .summary-grid {
+            gap: .75rem;
+        }
+
+        .summary-card {
+            padding: 1rem;
+        }
+
+        .card-value {
+            font-size: 1.25rem;
+        }
+
+        .inventory-form {
+            gap: .85rem;
         }
     }
 }

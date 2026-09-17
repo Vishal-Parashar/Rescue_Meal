@@ -196,9 +196,6 @@ app.patch("/api/profile", async (req, res, next) => {
   try {
     const session = await getSession(req);
     if (!session) return res.status(401).json({ error: "Authentication required." });
-    if (!["NGO", "FoodProducer"].includes(session.role)) {
-      return res.status(403).json({ error: "Only NGOs and Food Producers can edit organization names." });
-    }
     const result = await pool.query(
       "UPDATE users SET display_name = $1 WHERE id = $2 RETURNING id, email, display_name, role",
       [displayName, session.id],
@@ -379,7 +376,8 @@ app.get("/api/delivery/dashboard", async (req, res, next) => {
   try {
     const session = await requireRole(req, res, "delivery partner");
     if (!session) return;
-    const result = await pool.query(
+    const [result, completed] = await Promise.all([
+      pool.query(
       `SELECT b.id, b.batch_code, b.food_description, b.quantity,
               b.status, b.assigned_shelter, b.created_at,
               u.email AS producer_email, u.display_name AS producer_name
@@ -387,8 +385,16 @@ app.get("/api/delivery/dashboard", async (req, res, next) => {
        JOIN users u ON u.id = b.producer_id
        WHERE b.delivery_partner_id = $1 AND b.status IN ('Awaiting Pickup', 'Picked Up')
        ORDER BY b.created_at ASC`,
-    );
-    return res.json({ profile: session, assignments: result.rows });
+      [session.id],
+      ),
+      pool.query(
+        `SELECT COUNT(*)::INTEGER AS completed
+         FROM food_batches
+         WHERE delivery_partner_id = $1 AND status = 'Delivered'`,
+        [session.id],
+      ),
+    ]);
+    return res.json({ profile: session, assignments: result.rows, completed: completed.rows[0].completed });
   } catch (error) {
     return next(error);
   }
@@ -402,7 +408,8 @@ app.patch("/api/delivery/batches/:id", async (req, res, next) => {
     return res.status(400).json({ error: "A valid batch and OTP are required." });
   }
   try {
-    if (!await requireRole(req, res, "delivery partner")) return;
+    const session = await requireRole(req, res, "delivery partner");
+    if (!session) return;
     const result = await pool.query(
       stage === "pickup"
         ? `UPDATE food_batches SET status = 'Picked Up', pickup_verified_at = NOW()
@@ -428,7 +435,7 @@ app.get("/api/food-producer/dashboard", async (req, res, next) => {
     if (!session) return;
     const [batches, summary, inventory] = await Promise.all([
       pool.query(
-        `SELECT id, batch_code, food_description, food_category, quantity, preparation_time,
+        `SELECT id, batch_code, food_description, food_category, waste_type, quantity, preparation_time,
                 status, release_otp, created_at
          FROM food_batches
          WHERE producer_id = $1
@@ -460,11 +467,12 @@ app.get("/api/food-producer/dashboard", async (req, res, next) => {
 app.post("/api/food-producer/batches", async (req, res, next) => {
   const description = typeof req.body.foodDescription === "string" ? req.body.foodDescription.trim() : "";
   const category = typeof req.body.foodCategory === "string" ? req.body.foodCategory.trim() : "";
+  const wasteType = typeof req.body.wasteType === "string" ? req.body.wasteType.trim() : "";
   const quantity = typeof req.body.quantity === "string" ? req.body.quantity.trim() : "";
   const preparationTime = typeof req.body.preparationTime === "string" ? req.body.preparationTime.trim() : "";
   const quantityValue = Number.parseFloat(quantity.match(/[\d.]+/)?.[0] || "");
-  if (!description || !category || !quantity || !preparationTime || !Number.isFinite(quantityValue) || quantityValue <= 0) {
-    return res.status(400).json({ error: "Food description, category, quantity, and preparation time are required." });
+  if (!description || !category || !["Edible", "Non-edible"].includes(wasteType) || !quantity || !preparationTime || !Number.isFinite(quantityValue) || quantityValue <= 0) {
+    return res.status(400).json({ error: "Food description, category, waste type, quantity, and preparation time are required." });
   }
   try {
     const session = await requireRole(req, res, "FoodProducer");
@@ -472,10 +480,10 @@ app.post("/api/food-producer/batches", async (req, res, next) => {
     const otp = String(Math.floor(1000 + Math.random() * 9000));
     const result = await pool.query(
       `INSERT INTO food_batches
-       (producer_id, food_description, food_category, quantity, quantity_value, preparation_time, status, release_otp)
-       VALUES ($1, $2, $3, $4, $5, $6, 'Awaiting Pickup', $7)
-       RETURNING id, batch_code, food_description, food_category, quantity, preparation_time, status, release_otp, created_at`,
-      [session.id, description, category, quantity, quantityValue, preparationTime, otp],
+       (producer_id, food_description, food_category, waste_type, quantity, quantity_value, preparation_time, status, release_otp)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, 'Awaiting Pickup', $8)
+       RETURNING id, batch_code, food_description, food_category, waste_type, quantity, preparation_time, status, release_otp, created_at`,
+      [session.id, description, category, wasteType, quantity, quantityValue, preparationTime, otp],
     );
     return res.status(201).json({ batch: result.rows[0] });
   } catch (error) {
@@ -570,6 +578,27 @@ app.get("/api/ngo/requirements", async (req, res, next) => {
       [session.id],
     );
     return res.json({ profile: session, requirements: result.rows, deliveries: deliveries.rows });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+app.get("/api/ngo/marketplace", async (req, res, next) => {
+  try {
+    if (!await requireRole(req, res, "NGO")) return;
+    const result = await pool.query(
+      `SELECT b.id, b.batch_code, b.food_description, b.food_category, b.quantity,
+              b.quantity_value, b.preparation_time, b.status, b.created_at,
+              u.display_name AS producer_name, u.email AS producer_email
+       FROM food_batches b
+       JOIN users u ON u.id = b.producer_id
+       WHERE b.status = 'Awaiting Pickup'
+       ORDER BY b.created_at DESC`,
+    );
+    const recentVolume = result.rows
+      .filter((batch) => Date.now() - new Date(batch.created_at).getTime() <= 7 * 24 * 60 * 60 * 1000)
+      .reduce((sum, batch) => sum + Number(batch.quantity_value), 0);
+    return res.json({ listings: result.rows, predictedExcessServings: Math.round(recentVolume / 7) });
   } catch (error) {
     return next(error);
   }

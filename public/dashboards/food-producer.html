@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ResQmeal - Food Producer</title>
 
-    <link rel="stylesheet" href="/css/styles.css?v=4">
-    <link rel="stylesheet" href="/css/dashboards/food-producer.css?v=4">
+    <link rel="stylesheet" href="/css/styles.css?v=6">
+    <link rel="stylesheet" href="/css/dashboards/food-producer.css?v=8">
 </head>
 
 <body class="food-producer-dashboard">
@@ -101,6 +101,31 @@
 
         </section>
 
+        <section class="producer-tools-grid">
+            <article class="panel producer-tool">
+                <p class="eyebrow">Smart storage</p>
+                <h2>Storage conditions using IoT</h2>
+                <p class="tool-intro">Monitor temperature and humidity to protect food quality, improve energy efficiency, and reduce machine downtime.</p>
+                <div class="sensor-reading-grid">
+                    <div class="sensor-reading"><span>Temperature</span><strong id="storage-temperature">--</strong><small id="temperature-status">Waiting for sensor</small></div>
+                    <div class="sensor-reading"><span>Humidity</span><strong id="storage-humidity">--</strong><small id="humidity-status">Waiting for sensor</small></div>
+                </div>
+                <div class="storage-health" id="storage-health">Connect an IoT sensor to view live storage health.</div>
+                <button class="outline-button tool-button" id="simulate-sensor" type="button">Refresh sensor reading</button>
+            </article>
+            <article class="panel producer-tool">
+                <p class="eyebrow">Computer vision</p>
+                <h2>Raw materials details</h2>
+                <p class="tool-intro">Capture a label or material image to prepare traceability details before adding stock.</p>
+                <label class="upload-dropzone" for="material-image"><strong>Upload material image</strong><span>Use a clear label or product photo</span><input id="material-image" type="file" accept="image/*"></label>
+                <label class="capture-photo-button" for="material-camera">
+                    Capture image
+                    <input id="material-camera" type="file" accept="image/*" capture="environment">
+                </label>
+                <div class="cv-result" id="cv-result">No material image selected.</div>
+            </article>
+        </section>
+
         <section class="panel inventory-panel">
             <div class="inventory-heading">
                 <div>
@@ -142,7 +167,7 @@
             <div class="table-wrapper">
                 <table>
                     <thead><tr><th>Item</th><th>Category</th><th>Barcode</th><th>Quantity</th><th>Expiry</th><th>Action</th></tr></thead>
-                    <tbody id="inventory-table"><tr><td colspan="5">Loading inventory...</td></tr></tbody>
+                    <tbody id="inventory-table"><tr><td colspan="6">Loading inventory...</td></tr></tbody>
                 </table>
             </div>
         </section>
@@ -218,6 +243,13 @@
 
                     </div>
 
+                    <div class="form-group">
+                        <label for="wasteType">Waste food type</label>
+                        <select id="wasteType" required>
+                            <option value="Edible">Edible food</option>
+                            <option value="Non-edible">Non-edible food (plate waste)</option>
+                        </select>
+                    </div>
 
                     <!-- Quantity -->
 
@@ -294,6 +326,10 @@
                                 </th>
 
                                 <th>
+                                    Waste Type
+                                </th>
+
+                                <th>
                                     Qty
                                 </th>
 
@@ -301,9 +337,7 @@
                                     Status
                                 </th>
 
-                                <th>
-                                    Donor Release OTP
-                                </th>
+                                <th>Pickup OTP for driver</th>
 
                                 <th>
                                     Action
@@ -338,7 +372,7 @@
     </div>
 
 
-    <script src="/js/dashboards/food-producer.js?v=12" defer></script>
+    <script src="/js/dashboards/food-producer.js?v=15" defer></script>
 
 </body>
 </html>

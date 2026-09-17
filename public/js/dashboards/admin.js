@@ -36,24 +36,130 @@ function normalizeFoodCategory(category) {
   return value;
 }
 
+function showBatchDetails(batch) {
+  const modal = document.querySelector("#batch-modal");
+  document.querySelector("#batch-modal-title").textContent = `Batch #${batch.batch_code}`;
+  document.querySelector("#batch-details").innerHTML = [
+    ["Food entered", batch.food_description],
+    ["Category", batch.food_category],
+    ["Quantity", `${batch.quantity} (${batch.quantity_value} servings)`],
+    ["Preparation time", batch.preparation_time],
+    ["Food producer", batch.producer_name || "Name not set"],
+    ["Producer email", batch.producer_email],
+    ["Submitted", new Date(batch.created_at).toLocaleString()],
+    ["Current status", batch.status],
+  ].map(([label, value]) => `
+    <div class="batch-detail">
+      <span>${escapeHtml(label)}</span>
+      <strong>${escapeHtml(value || "Not provided")}</strong>
+    </div>
+  `).join("");
+  modal.hidden = false;
+  document.querySelector("#batch-modal-close").focus();
+}
+
+function hideBatchDetails() {
+  document.querySelector("#batch-modal").hidden = true;
+}
+
+function renderRequests(requirements) {
+  const table = document.querySelector("#requestsTableBody");
+  table.innerHTML = requirements.length ? requirements.map((item) => `
+    <tr>
+      <td><strong>${escapeHtml(formatNgoName(item.ngo_name, item.ngo_email))}</strong></td>
+      <td>${escapeHtml(item.food_description)}<br><small>${escapeHtml(item.food_category)}</small></td>
+      <td>${escapeHtml(item.servings)}</td>
+      <td>${new Date(item.needed_by).toLocaleDateString()}</td>
+    </tr>
+  `).join("") : '<tr><td colspan="4">No open redistribution requests.</td></tr>';
+}
+
+function renderEsg(metrics, batches, requirements) {
+  const totalBatches = batches.length;
+  const deliveredBatches = batches.filter((batch) => batch.status === "Delivered").length;
+  const rescuedServings = batches
+    .filter((batch) => batch.status === "Delivered")
+    .reduce((sum, batch) => sum + Number(batch.quantity_value), 0);
+  const deliveryRate = totalBatches ? Math.round((deliveredBatches / totalBatches) * 100) : 0;
+  const rescueRate = metrics.totalPrepared ? Math.round((rescuedServings / metrics.totalPrepared) * 100) : 0;
+  const score = Math.min(100, Math.round((rescueRate * 0.5) + (deliveryRate * 0.4) + (requirements.length ? 10 : 0)));
+
+  document.querySelector("#esg-score-value").innerHTML = `${score}<span>/100</span>`;
+  document.querySelector("#esg-rescued").textContent = `${rescuedServings} servings`;
+  document.querySelector("#esg-delivery").textContent = `${deliveryRate}%`;
+  document.querySelector("#esg-requests").textContent = requirements.length;
+}
+
+function getDemandForecast(batches, requirements) {
+  const week = 7 * 24 * 60 * 60 * 1000;
+  const recentBatches = batches.filter((batch) => Date.now() - new Date(batch.created_at).getTime() <= week);
+  const recentVolume = recentBatches.reduce((sum, batch) => sum + Number(batch.quantity_value), 0);
+  const openDemand = requirements.reduce((sum, requirement) => sum + Number(requirement.servings), 0);
+
+  if (!recentBatches.length) {
+    return { label: "New", percent: 0, insight: "Not enough recent submissions to forecast next week's food availability." };
+  }
+
+  const projectedSupply = Math.round(recentVolume);
+  const difference = projectedSupply - openDemand;
+  const percent = Math.min(100, Math.round((Math.abs(difference) / Math.max(projectedSupply, openDemand, 1)) * 100));
+  if (difference > 0) {
+    return {
+      label: `+${difference}`,
+      percent,
+      insight: `An estimated ${projectedSupply} servings may be available next week, around ${difference} more than current open demand. Add consumer capacity to prevent waste.`,
+    };
+  }
+  if (difference < 0) {
+    return {
+      label: `${difference}`,
+      percent,
+      insight: `An estimated shortfall of ${Math.abs(difference)} servings may occur next week. Encourage more producer submissions or prioritize urgent requests.`,
+    };
+  }
+  return { label: "Balanced", percent: 10, insight: "Projected food availability is currently aligned with open consumer demand." };
+}
+
 function renderOperations(data) {
   const { metrics, batches, requirements, deliveryPartners } = data;
+  window.adminBatches = batches;
+  const awaitingBatches = batches.filter((batch) => batch.status === "Awaiting Pickup").length;
+  const deliveredBatches = batches.filter((batch) => batch.status === "Delivered").length;
+  const rescuedServings = batches
+    .filter((batch) => batch.status === "Delivered")
+    .reduce((sum, batch) => sum + Number(batch.quantity_value), 0);
+  const demandForecast = getDemandForecast(batches, requirements || []);
   const total = Math.max(metrics.totalPrepared, 1);
   document.querySelector("#total-prepared").textContent = `${metrics.totalPrepared} servings`;
   document.querySelector("#pending-allocations").textContent = `${metrics.pendingAllocations} Batches`;
   document.querySelector("#dispatch-efficiency").textContent = `${metrics.dispatchEfficiency}%`;
-  document.querySelector("#prepared-bar").style.width = "100%";
-  document.querySelector("#prepared-value").textContent = `${metrics.totalPrepared} servings`;
-  document.querySelector("#need-bar").style.width = `${Math.min(100, (metrics.pendingAllocations / Math.max(batches.length, 1)) * 100)}%`;
-  document.querySelector("#need-value").textContent = `${metrics.pendingAllocations} pending`;
-  const delivered = batches.filter((batch) => batch.status === "Delivered").reduce((sum, batch) => sum + Number(batch.quantity_value), 0);
-  document.querySelector("#risk-bar").style.width = `${Math.min(100, (delivered / total) * 100)}%`;
-  document.querySelector("#risk-value").textContent = `${delivered} delivered`;
+  document.querySelector("#requests-bar").style.width = `${Math.min(100, (requirements.length / Math.max(batches.length, 1)) * 100)}%`;
+  document.querySelector("#requests-value").textContent = `${requirements.length} requests`;
+  document.querySelector("#need-bar").style.width = `${Math.min(100, (awaitingBatches / Math.max(batches.length, 1)) * 100)}%`;
+  document.querySelector("#need-value").textContent = `${awaitingBatches} batches`;
+  document.querySelector("#risk-bar").style.width = `${Math.min(100, (rescuedServings / total) * 100)}%`;
+  document.querySelector("#risk-value").textContent = `${rescuedServings} servings`;
+  document.querySelector("#trend-bar").style.width = `${demandForecast.percent}%`;
+  document.querySelector("#trend-value").textContent = demandForecast.label;
+  const insight = document.querySelector("#analytics-insight");
+  if (!batches.length) {
+    insight.innerHTML = "<strong>Next step:</strong> Waiting for food producer submissions.";
+  } else if (awaitingBatches) {
+    insight.innerHTML = `<strong>Action recommended:</strong> ${awaitingBatches} batch${awaitingBatches === 1 ? "" : "es"} ${awaitingBatches === 1 ? "is" : "are"} awaiting redistribution. Match ${awaitingBatches === 1 ? "it" : "them"} with an open request to reduce waste.`;
+  } else if (demandForecast.label !== "Balanced") {
+    insight.innerHTML = `<strong>Prediction:</strong> ${demandForecast.insight}`;
+  } else if (deliveredBatches === batches.length) {
+    insight.innerHTML = "<strong>Great work:</strong> Every submitted batch has been delivered to a consumer.";
+  } else {
+    insight.innerHTML = `<strong>Progress:</strong> ${metrics.dispatchEfficiency}% of submitted batches have been delivered.`;
+  }
+  renderRequests(requirements || []);
+  renderEsg(metrics, batches, requirements || []);
 
   const table = document.querySelector("#matchingTableBody");
   table.innerHTML = batches.length ? batches.map((batch) => `
     <tr data-batch-id="${batch.id}">
-      <td class="bold">#${escapeHtml(batch.batch_code)}</td>
+      <td class="bold"><button type="button" class="batch-details-button" data-batch-details="${batch.id}">#${escapeHtml(batch.batch_code)}</button></td>
       <td><strong>${escapeHtml(batch.producer_name || batch.producer_email)}</strong><br><small>${escapeHtml(batch.producer_email)}</small></td>
       <td>${new Date(batch.created_at).toLocaleDateString()}</td>
       <td><select class="custom-select requirement-select" ${batch.status !== "Awaiting Pickup" ? "disabled" : ""}>
@@ -146,6 +252,13 @@ document.querySelector("#profile-button").addEventListener("click", () => {
 });
 
 document.querySelector("#matchingTableBody").addEventListener("click", async (event) => {
+  const batchDetailsId = event.target.dataset.batchDetails;
+  if (batchDetailsId) {
+    const row = event.target.closest("tr");
+    const batch = window.adminBatches.find((item) => String(item.id) === batchDetailsId);
+    if (batch) showBatchDetails(batch);
+    return;
+  }
   const batchId = event.target.dataset.assign;
   if (!batchId) return;
   const row = event.target.closest("tr");
@@ -160,11 +273,20 @@ document.querySelector("#matchingTableBody").addEventListener("click", async (ev
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ requirementId, deliveryPartnerId: row.querySelector(".driver-select").value }),
     });
+
     setStatus("Batch assigned successfully.");
     await loadDashboard();
   } catch (error) {
     setStatus(error.message, true);
   }
+});
+
+document.querySelector("#batch-modal-close").addEventListener("click", hideBatchDetails);
+document.querySelector("#batch-modal").addEventListener("click", (event) => {
+  if (event.target.id === "batch-modal") hideBatchDetails();
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") hideBatchDetails();
 });
 
 document.querySelector("#usersTableBody").addEventListener("change", async (event) => {

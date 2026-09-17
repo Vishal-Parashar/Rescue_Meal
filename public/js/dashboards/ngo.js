@@ -69,6 +69,22 @@ function renderDeliveries(deliveries) {
     </article>`).join("") : '<p class="empty-state">No matched surplus deliveries yet.</p>';
 }
 
+function renderMarketplace(listings, predictedExcessServings) {
+  document.querySelector("#marketplace-forecast").textContent = predictedExcessServings
+    ? `Prediction: about ${predictedExcessServings} servings per day based on recent producer submissions.`
+    : "Prediction: more producer history is needed to estimate excess food.";
+  const list = document.querySelector("#marketplace-list");
+  list.innerHTML = listings.length ? listings.map((item) => `
+    <article class="marketplace-item">
+      <div>
+        <h3>${escapeHtml(item.food_description)}</h3>
+        <p>${escapeHtml(item.food_category)} · ${escapeHtml(item.quantity)} · ${escapeHtml(item.producer_name || item.producer_email)}</p>
+      </div>
+      <span class="marketplace-status">Available now</span>
+    </article>
+  `).join("") : '<p class="empty-state">No excess food is available right now.</p>';
+}
+
 async function loadDashboard() {
   const result = await request("/api/ngo/requirements");
   document.querySelector("#profile-name").value = result.profile.display_name || "";
@@ -80,6 +96,12 @@ async function loadDashboard() {
   document.querySelector("#header-profile-avatar").textContent = result.profile.email[0].toUpperCase();
   renderRequirements(result.requirements);
   renderDeliveries(result.deliveries);
+  await loadMarketplace();
+}
+
+async function loadMarketplace() {
+  const result = await request("/api/ngo/marketplace");
+  renderMarketplace(result.listings, result.predictedExcessServings);
 }
 
 logoutButton.addEventListener("click", async () => {
@@ -132,4 +154,5 @@ requirementForm.addEventListener("submit", async (event) => {
 });
 
 document.querySelector("#refresh-requirements").addEventListener("click", loadDashboard);
+document.querySelector("#refresh-marketplace").addEventListener("click", loadMarketplace);
 loadDashboard().catch((error) => { statusMessage.textContent = error.message; });

@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NGO dashboard | resQmeal</title>
-    <link rel="stylesheet" href="/css/styles.css?v=6">
-    <link rel="stylesheet" href="/css/dashboards/ngo.css?v=6">
+    <link rel="stylesheet" href="/css/styles.css?v=8">
+    <link rel="stylesheet" href="/css/dashboards/ngo.css?v=9">
 </head>
 
 <body class="dashboard-page ngo-dashboard">
@@ -47,10 +47,22 @@
             <h2>Incoming food</h2>
             <div class="requirements-list" id="ngo-deliveries"></div>
         </section>
+        <section class="dashboard-card marketplace-card">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Marketplace</p>
+                    <h2>Available and predicted excess food</h2>
+                </div>
+                <button class="outline-button" id="refresh-marketplace" type="button">Refresh</button>
+            </div>
+            <p class="form-intro">Browse food currently awaiting pickup and a simple forecast from recent producer submissions.</p>
+            <div class="marketplace-forecast" id="marketplace-forecast">Loading predicted excess...</div>
+            <div class="marketplace-list" id="marketplace-list"></div>
+        </section>
         <section class="ngo-grid">
             <section class="dashboard-card role-content">
-                <p class="eyebrow">Request support</p>
-                <h2>Enter food requirements</h2>
+                <p class="eyebrow">Posting of required materials</p>
+                <h2>Post a food requirement</h2>
                 <p class="form-intro">Tell local FoodProducers what your community needs.</p>
                 <form id="requirement-form">
                     <div class="field"><label for="food-description">Food description</label><input
@@ -88,7 +100,7 @@
             </section>
         </section>
     </main>
-    <script src="/js/dashboards/ngo.js?v=9" defer></script>
+    <script src="/js/dashboards/ngo.js?v=10" defer></script>
 </body>
 
 </html>

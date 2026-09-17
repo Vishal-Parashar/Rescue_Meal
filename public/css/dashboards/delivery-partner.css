@@ -4,6 +4,7 @@
 
 body {
   margin: 0;
+  overflow-x: hidden;
   color: #19352d;
   background: #f7f8f4;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -444,7 +445,44 @@ input:focus {
   font-size: 0.8rem;
 }
 
+@media (max-width: 900px) {
+  .dashboard-card {
+    padding: 2rem;
+  }
+  .data-table,
+  .dashboard-page table {
+    min-width: 38rem;
+  }
+}
+@media (max-width: 1024px) {
+  .admin-dashboard .dashboard-container,
+  .delivery-partner-dashboard .dashboard-container,
+  .food-producer-dashboard .dashboard,
+  .ngo-dashboard .dashboard-shell {
+    width: min(100% - 2rem, 76rem);
+  }
+}
 @media (max-width: 760px) {
+  .dashboard-page {
+    padding: 1rem;
+  }
+  .dashboard-card {
+    padding: 1.25rem;
+  }
+  .top-nav,
+  .dashboard-header {
+    gap: 1rem;
+  }
+  .header-profile-panel {
+    right: 0;
+    max-width: calc(100vw - 2rem);
+  }
+  input,
+  select,
+  textarea,
+  button {
+    font-size: 1rem;
+  }
   .food-producer-dashboard .summary-grid {
     padding-top: 1.5rem;
   }
@@ -588,6 +626,88 @@ input:focus {
   font-size: 1.35rem;
   letter-spacing: -0.04em;
 }
+.delivery-partner-dashboard .section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+.delivery-partner-dashboard .section-heading .panel-title {
+  margin-bottom: 0;
+}
+.delivery-partner-dashboard .map-status {
+  padding: 0.3rem 0.55rem;
+  border-radius: 2rem;
+  color: #205c48;
+  background: #e5f3e9;
+  font-size: 0.7rem;
+  font-weight: 750;
+}
+.delivery-partner-dashboard .route-points {
+  display: grid;
+  gap: 0.4rem;
+  margin: 1.25rem 0;
+}
+.delivery-partner-dashboard .route-point {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.delivery-partner-dashboard .route-point small,
+.delivery-partner-dashboard .route-point strong {
+  display: block;
+}
+.delivery-partner-dashboard .route-point small {
+  margin-bottom: 0.2rem;
+  color: #70827b;
+  font-size: 0.7rem;
+}
+.delivery-partner-dashboard .route-point strong {
+  color: #19352d;
+  font-size: 0.82rem;
+}
+.delivery-partner-dashboard .route-marker {
+  display: grid;
+  width: 1.8rem;
+  height: 1.8rem;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+.delivery-partner-dashboard .source-marker {
+  background: #397696;
+}
+.delivery-partner-dashboard .destination-marker {
+  background: #2f7d61;
+}
+.delivery-partner-dashboard .route-line {
+  width: 2px;
+  height: 1.1rem;
+  margin-left: 0.9rem;
+  background: #dce5df;
+}
+.delivery-partner-dashboard .map-placeholder {
+  display: grid;
+  min-height: 10rem;
+  place-content: center;
+  gap: 0.35rem;
+  border: 1px dashed #dce5df;
+  border-radius: 0.8rem;
+  color: #70827b;
+  background: #f7faf7;
+  text-align: center;
+}
+.delivery-partner-dashboard .map-placeholder span {
+  color: #19352d;
+  font-size: 0.85rem;
+  font-weight: 750;
+}
+.delivery-partner-dashboard .map-placeholder small {
+  font-size: 0.72rem;
+}
 .delivery-partner-dashboard .terminal-box {
   padding: 1.2rem;
   border-radius: 0.8rem;
@@ -631,6 +751,12 @@ input:focus {
 .delivery-partner-dashboard .step-label {
   margin-right: 0.5rem;
   font-weight: 700;
+}
+.delivery-partner-dashboard .otp-help {
+  margin: 0;
+  color: #70827b;
+  font-size: 0.8rem;
+  line-height: 1.5;
 }
 .delivery-partner-dashboard .code-box {
   display: inline-block;
@@ -680,10 +806,13 @@ input:focus {
 .delivery-partner-dashboard .btn-verify:hover {
   background: #205c48;
 }
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .delivery-partner-dashboard .metrics-grid,
   .delivery-partner-dashboard .panels-grid {
     grid-template-columns: 1fr;
+  }
+  .delivery-partner-dashboard .live-map-panel {
+    order: -1;
   }
 }
 @media (max-width: 760px) {
@@ -699,6 +828,13 @@ input:focus {
   }
   .delivery-partner-dashboard .dashboard-container {
     width: min(100% - 2rem, 76rem);
+  }
+  .delivery-partner-dashboard .panel {
+    padding: 1rem;
+  }
+  .delivery-partner-dashboard .section-heading {
+    align-items: flex-start;
+    flex-direction: column;
   }
   .delivery-partner-dashboard .otp-input-group {
     align-items: stretch;

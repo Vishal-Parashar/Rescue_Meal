@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ResQmeal - Delivery Volunteer Portal</title>
-  <link rel="stylesheet" href="/css/styles.css?v=4">
-  <link rel="stylesheet" href="/css/dashboards/delivery-partner.css?v=4">
+  <link rel="stylesheet" href="/css/styles.css?v=6">
+  <link rel="stylesheet" href="/css/dashboards/delivery-partner.css?v=10">
 </head>
 <body class="delivery-partner-dashboard">
 
@@ -19,7 +19,17 @@
       <button class="btn-logout outline-button" id="logout-button" type="button">Sign out</button>
       <div class="header-profile-panel" id="header-profile-panel" hidden>
         <div class="avatar" id="header-profile-avatar">D</div>
-        <div><span class="profile-label">Signed in as</span><strong id="header-profile-email">Loading...</strong><span id="header-profile-role">Delivery partner</span></div>
+        <div>
+          <span class="profile-label">Signed in as</span>
+          <strong id="header-profile-email">Loading...</strong>
+          <span id="header-profile-role">Delivery partner</span>
+          <form id="profile-form" class="profile-edit-form">
+            <label for="profile-name">Username</label>
+            <input id="profile-name" name="displayName" maxlength="120" required>
+            <button type="submit" class="outline-button">Save username</button>
+            <span id="profile-status" class="form-status" role="status"></span>
+          </form>
+        </div>
       </div>
     </div>
   </header>
@@ -30,7 +40,7 @@
     <!-- Status & Driver Metric Cards -->
     <section class="metrics-grid">
       <div class="metric-card border-blue">
-        <span class="card-label">DRIVER NAME</span>
+        <span class="card-label">Delivery Partner</span>
         <div class="card-value" id="driver-name">Loading...</div>
         <p class="card-desc">Active delivery partner</p>
       </div>
@@ -44,7 +54,7 @@
       <div class="metric-card border-green">
         <span class="card-label">ON-TIME COMPLETION</span>
         <div class="card-value" id="on-time-completion">0%</div>
-        <p class="card-desc">Completed deliveries this session</p>
+        <p class="card-desc">Completed deliveries</p>
       </div>
     </section>
 
@@ -53,28 +63,56 @@
       
       <!-- Transit Route Console -->
       <article class="panel">
-        <h2 class="panel-title">Transit Route Feasibility</h2>
+        <h2 class="panel-title">Assigned delivery </h2>
         <div class="assignment-list" id="assignment-list"></div>
+      </article>
+
+      <!-- Live Route Map -->
+      <article class="panel live-map-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Live route</p>
+            <h2 class="panel-title">Source to destination</h2>
+          </div>
+          <span class="map-status" id="map-status">Map ready</span>
+        </div>
+        <div class="route-points">
+          <div class="route-point">
+            <span class="route-marker source-marker">S</span>
+            <div><small>Pickup source</small><strong id="map-source">Select an assignment</strong></div>
+          </div>
+          <div class="route-line"></div>
+          <div class="route-point">
+            <span class="route-marker destination-marker">D</span>
+            <div><small>Delivery destination</small><strong id="map-destination">Select an assignment</strong></div>
+          </div>
+        </div>
+        <div class="map-placeholder" id="live-map" data-map-provider="todo">
+          <span>Live map container</span>
+          <small>Add your map provider and route tracking code here.</small>
+        </div>
       </article>
 
       <!-- Two-Tier Verification -->
       <article class="panel">
-        <h2 class="panel-title">Two-Tier OTP Verification</h2>
+        <p class="eyebrow">Secure handoff</p>
+        <h2 class="panel-title">Verify pickup or delivery</h2>
         <div class="otp-verification-container">
           
           <div class="step-row step-two">
-            <label for="active-batch" class="step-label">Select an assignment. Verify pickup with the producer OTP, then verify delivery with the NGO OTP:</label>
+            <p class="otp-help" id="otp-help">Select a batch to see which OTP is needed.</p>
             <select id="active-batch" class="custom-select" aria-label="Active assignment"></select>
+            <label for="shelterOtp" class="step-label" id="otp-label">OTP</label>
             <div class="otp-input-group">
               <input 
                 type="text" 
                 id="shelterOtp" 
                 class="otp-input" 
-                placeholder="Enter required OTP" 
+                placeholder="Select a batch first" 
                 maxlength="6"
                 autocomplete="off"
               >
-              <button type="button" class="btn-verify">Verify<br>OTP</button>
+              <button type="button" class="btn-verify" id="verify-otp">Verify OTP</button>
             </div>
             <p class="form-status" id="delivery-status" role="status" aria-live="polite"></p>
           </div>
@@ -85,6 +123,6 @@
     </section>
   </main>
 
-    <script src="/js/dashboards/delivery-partner.js?v=5" defer></script>
+    <script src="/js/dashboards/delivery-partner.js?v=10" defer></script>
   </body>
   </html>

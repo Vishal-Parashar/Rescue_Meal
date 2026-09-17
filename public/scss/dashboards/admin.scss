@@ -91,6 +91,45 @@
     padding-bottom: 3rem;
   }
 
+  .admin-intro {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .admin-intro h1 {
+    max-width: 34rem;
+    margin-bottom: .75rem;
+    color: $ink;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+  }
+
+  .admin-intro p:last-child {
+    margin-bottom: 0;
+    color: $muted;
+    line-height: 1.6;
+  }
+
+  .admin-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .55rem;
+    max-width: 32rem;
+  }
+
+  .admin-nav a {
+    padding: .55rem .7rem;
+    border: 1px solid $line;
+    border-radius: 999px;
+    color: $green-dark;
+    background: $white;
+    font-size: .72rem;
+    font-weight: 750;
+  }
+
   .metrics-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -161,6 +200,54 @@
     letter-spacing: -.04em;
   }
 
+  .panel-intro {
+    margin: -.75rem 0 1.25rem;
+    color: $muted;
+    font-size: .82rem;
+    line-height: 1.5;
+  }
+
+  .secondary-panels {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(18rem, .75fr);
+    gap: 1.25rem;
+    margin-top: 1.25rem;
+  }
+
+  .esg-score-value {
+    margin: .5rem 0 1rem;
+    color: $green-dark;
+    font-size: 3.4rem;
+    font-weight: 850;
+    letter-spacing: -.08em;
+  }
+
+  .esg-score-value span {
+    color: $muted;
+    font-size: 1.1rem;
+    letter-spacing: -.03em;
+  }
+
+  .esg-breakdown {
+    display: grid;
+    gap: .75rem;
+    margin-top: 1.5rem;
+  }
+
+  .esg-breakdown div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: .75rem;
+    border-top: 1px solid #edf1ee;
+    color: $muted;
+    font-size: .8rem;
+  }
+
+  .esg-breakdown strong {
+    color: $ink;
+  }
+
   .table-wrapper {
     overflow-x: auto;
   }
@@ -187,6 +274,98 @@
 
   .data-table td {
     color: $ink;
+  }
+
+  .batch-details-button {
+    padding: 0;
+    border: 0;
+    color: $green-dark;
+    background: transparent;
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .batch-details-button:hover {
+    text-decoration: underline;
+  }
+
+  .batch-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: grid;
+    place-items: center;
+    padding: 1.5rem;
+    background: rgba(25, 53, 45, .42);
+  }
+
+  .batch-modal[hidden] {
+    display: none;
+  }
+
+  .batch-modal-card {
+    width: min(100%, 34rem);
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    background: $white;
+    box-shadow: 0 1.5rem 4rem rgba(25, 53, 45, .2);
+  }
+
+  .batch-modal-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+
+  .batch-modal-header .panel-title,
+  .batch-modal-header h2 {
+    margin-bottom: 0;
+  }
+
+  .modal-close {
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid $line;
+    border-radius: 50%;
+    color: $muted;
+    background: $white;
+    font-size: 1.35rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .batch-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .75rem;
+  }
+
+  .batch-detail {
+    padding: .8rem;
+    border: 1px solid #edf1ee;
+    border-radius: .65rem;
+    background: #fbfcfa;
+  }
+
+  .batch-detail span {
+    display: block;
+    margin-bottom: .3rem;
+    color: $muted;
+    font-size: .7rem;
+    font-weight: 750;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  .batch-detail strong {
+    color: $ink;
+    font-size: .85rem;
+    line-height: 1.4;
   }
 
   .custom-select {
@@ -264,7 +443,7 @@
     text-align: right;
   }
 
-  .prescriptive-notice {
+  .analytics-insight {
     padding: .8rem;
     border-left: 3px solid #d6953d;
     color: $muted;
@@ -306,20 +485,51 @@
     min-width: 4.8rem;
   }
 
-  @media (max-width: 900px) {
+  @media (max-width: 1024px) {
 
     .metrics-grid,
-    .panels-grid {
+    .panels-grid,
+    .secondary-panels {
       grid-template-columns: 1fr;
+    }
+
+    .data-table {
+      min-width: 42rem;
     }
   }
 
   @media (max-width: 760px) {
+    .admin-intro {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .admin-nav {
+      justify-content: flex-start;
+    }
+
     .top-nav {
       width: min(100% - 2rem, 76rem);
       align-items: flex-start;
       flex-direction: column;
       padding-bottom: 2rem;
+    }
+
+    .admin-intro h1 {
+      font-size: 2rem;
+    }
+
+    .admin-nav {
+      width: 100%;
+    }
+
+    .admin-nav a {
+      flex: 1 1 auto;
+      text-align: center;
+    }
+
+    .panel {
+      padding: 1rem;
     }
 
     .user-meta {
@@ -342,6 +552,10 @@
 
     .user-management {
       padding: 1rem;
+    }
+
+    .batch-details-grid {
+      grid-template-columns: 1fr;
     }
   }
 }

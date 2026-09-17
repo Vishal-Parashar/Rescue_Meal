@@ -160,6 +160,103 @@
     letter-spacing: -.04em;
   }
 
+  .section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .section-heading .panel-title {
+    margin-bottom: 0;
+  }
+
+  .map-status {
+    padding: .3rem .55rem;
+    border-radius: 2rem;
+    color: $green-dark;
+    background: #e5f3e9;
+    font-size: .7rem;
+    font-weight: 750;
+  }
+
+  .route-points {
+    display: grid;
+    gap: .4rem;
+    margin: 1.25rem 0;
+  }
+
+  .route-point {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+  }
+
+  .route-point small,
+  .route-point strong {
+    display: block;
+  }
+
+  .route-point small {
+    margin-bottom: .2rem;
+    color: $muted;
+    font-size: .7rem;
+  }
+
+  .route-point strong {
+    color: $ink;
+    font-size: .82rem;
+  }
+
+  .route-marker {
+    display: grid;
+    width: 1.8rem;
+    height: 1.8rem;
+    flex-shrink: 0;
+    place-items: center;
+    border-radius: 50%;
+    color: $white;
+    font-size: .75rem;
+    font-weight: 800;
+  }
+
+  .source-marker {
+    background: #397696;
+  }
+
+  .destination-marker {
+    background: $green;
+  }
+
+  .route-line {
+    width: 2px;
+    height: 1.1rem;
+    margin-left: .9rem;
+    background: $line;
+  }
+
+  .map-placeholder {
+    display: grid;
+    min-height: 10rem;
+    place-content: center;
+    gap: .35rem;
+    border: 1px dashed $line;
+    border-radius: .8rem;
+    color: $muted;
+    background: #f7faf7;
+    text-align: center;
+  }
+
+  .map-placeholder span {
+    color: $ink;
+    font-size: .85rem;
+    font-weight: 750;
+  }
+
+  .map-placeholder small {
+    font-size: .72rem;
+  }
+
   .terminal-box {
     padding: 1.2rem;
     border-radius: .8rem;
@@ -211,6 +308,13 @@
   .step-label {
     margin-right: .5rem;
     font-weight: 700;
+  }
+
+  .otp-help {
+    margin: 0;
+    color: $muted;
+    font-size: .8rem;
+    line-height: 1.5;
   }
 
   .code-box {
@@ -268,11 +372,15 @@
     background: $green-dark;
   }
 
-  @media (max-width: 900px) {
+  @media (max-width: 1024px) {
 
     .metrics-grid,
     .panels-grid {
       grid-template-columns: 1fr;
+    }
+
+    .live-map-panel {
+      order: -1;
     }
   }
 
@@ -291,6 +399,15 @@
 
     .dashboard-container {
       width: min(100% - 2rem, 76rem);
+    }
+
+    .panel {
+      padding: 1rem;
+    }
+
+    .section-heading {
+      align-items: flex-start;
+      flex-direction: column;
     }
 
     .otp-input-group {

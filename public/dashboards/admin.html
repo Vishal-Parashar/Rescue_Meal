@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ResQmeal - Central Redistribution Ops</title>
-  <link rel="stylesheet" href="/css/styles.css?v=4">
-  <link rel="stylesheet" href="/css/dashboards/admin.css?v=4">
+  <link rel="stylesheet" href="/css/styles.css?v=6">
+  <link rel="stylesheet" href="/css/dashboards/admin.css?v=9">
 </head>
 <body class="admin-dashboard">
 
@@ -25,6 +25,15 @@
   </header>
 
   <main class="dashboard-container">
+    <section class="admin-intro">
+      <div>
+        <p class="eyebrow">ADMIN</p>
+        <h1>Central redistribution operations</h1>
+        <p>Monitor waste, coordinate redistribution, and track the impact of every rescued meal.</p>
+      </div>
+      </nav>
+    </section>
+
     <!-- Metric Stat Cards -->
     <section class="metrics-grid">
       <div class="metric-card border-blue">
@@ -49,8 +58,10 @@
     <!-- Main Content Panels -->
     <section class="panels-grid">
       <!-- Matching Console -->
-      <article class="panel">
-        <h2 class="panel-title">Surplus Matching Console</h2>
+      <article class="panel" id="redistribution-management">
+        <p class="eyebrow">Redistribution management</p>
+        <h2 class="panel-title">Assign consumers and delivery</h2>
+        <p class="panel-intro">Assign each surplus batch to an NGO consumer and delivery partner, then follow its delivery record.</p>
         <p class="form-status" id="admin-status" role="status" aria-live="polite"></p>
         <div class="table-wrapper">
           <table class="data-table">
@@ -71,38 +82,83 @@
       </article>
 
       <!-- Predictive Intelligence & Waste Analytics -->
-      <article class="panel">
-        <h2 class="panel-title">Predictive Intelligence & Waste Analytics</h2>
+      <article class="panel" id="waste-analytics">
+        <p class="eyebrow">Waste prediction and analytics</p>
+        <h2 class="panel-title">Predictive intelligence</h2>
+        <p class="panel-intro">A quick view of food at risk, recovered meals, and redistribution progress.</p>
         <div class="analytics-breakdown">
           
           <div class="metric-progress-row">
-            <span class="row-label">Total Prepared</span>
+            <span class="row-label">Open consumer requests</span>
             <div class="progress-track">
-              <div class="progress-bar bar-blue" id="prepared-bar" style="width: 0%;"></div>
+              <div class="progress-bar bar-blue" id="requests-bar" style="width: 0%;"></div>
             </div>
-            <span class="row-value" id="prepared-value">0</span>
+            <span class="row-value" id="requests-value">0</span>
           </div>
 
           <div class="metric-progress-row">
-            <span class="row-label">Predicted Need</span>
+            <span class="row-label">Awaiting redistribution</span>
             <div class="progress-track">
-              <div class="progress-bar bar-green" id="need-bar" style="width: 0%;"></div>
+              <div class="progress-bar bar-orange" id="need-bar" style="width: 0%;"></div>
             </div>
             <span class="row-value" id="need-value">0</span>
           </div>
 
           <div class="metric-progress-row">
-            <span class="row-label">Overproduction Risk</span>
+            <span class="row-label">Food rescued</span>
             <div class="progress-track">
-              <div class="progress-bar bar-orange" id="risk-bar" style="width: 0%;"></div>
+              <div class="progress-bar bar-green" id="risk-bar" style="width: 0%;"></div>
             </div>
             <span class="row-value" id="risk-value">0</span>
           </div>
 
+          <div class="metric-progress-row">
+            <span class="row-label">7-day demand forecast</span>
+            <div class="progress-track">
+              <div class="progress-bar bar-blue" id="trend-bar" style="width: 0%;"></div>
+            </div>
+            <span class="row-value" id="trend-value">--</span>
+          </div>
+
         </div>
 
-        <div class="prescriptive-notice">
-          <strong>Live operation:</strong> Metrics and batches below are calculated from FoodProducer submissions.
+        <div class="analytics-insight" id="analytics-insight">
+          Loading the latest predictive insight...
+        </div>
+      </article>
+    </section>
+
+    <section class="secondary-panels">
+      <article class="panel" id="redistribution-requests">
+        <p class="eyebrow">Redistribution requests</p>
+        <h2 class="panel-title">Open consumer requirements</h2>
+        <p class="panel-intro">Requests submitted by NGOs remain part of the existing matching workflow.</p>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Consumer</th>
+                <th>Request</th>
+                <th>Servings</th>
+                <th>Needed by</th>
+              </tr>
+            </thead>
+            <tbody id="requestsTableBody">
+              <tr><td colspan="4">Loading redistribution requests...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="panel esg-panel" id="esg-score">
+        <p class="eyebrow">ESG score</p>
+        <h2 class="panel-title">ResQmeal impact</h2>
+        <div class="esg-score-value" id="esg-score-value">0<span>/100</span></div>
+        <p class="panel-intro">A transparent operational score based on rescued food, completed deliveries, and active redistribution.</p>
+        <div class="esg-breakdown">
+          <div><span>Food rescued</span><strong id="esg-rescued">0 servings</strong></div>
+          <div><span>Delivery completion</span><strong id="esg-delivery">0%</strong></div>
+          <div><span>Active requests</span><strong id="esg-requests">0</strong></div>
         </div>
       </article>
     </section>
@@ -135,6 +191,19 @@
     </section>
   </main>
 
-  <script src="/js/dashboards/admin.js?v=10" defer></script>
+  <div class="batch-modal" id="batch-modal" role="dialog" aria-modal="true" aria-labelledby="batch-modal-title" hidden>
+    <div class="batch-modal-card">
+      <div class="batch-modal-header">
+        <div>
+          <p class="eyebrow">Food producer submission</p>
+          <h2 id="batch-modal-title">Batch details</h2>
+        </div>
+        <button class="modal-close" id="batch-modal-close" type="button" aria-label="Close batch details">&times;</button>
+      </div>
+      <div class="batch-details-grid" id="batch-details"></div>
+    </div>
+  </div>
+
+  <script src="/js/dashboards/admin.js?v=14" defer></script>
 </body>
 </html>

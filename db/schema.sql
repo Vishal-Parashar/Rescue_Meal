@@ -28,6 +28,8 @@ CREATE TABLE IF NOT EXISTS food_batches (
   producer_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   food_description TEXT NOT NULL,
   food_category TEXT NOT NULL,
+  waste_type TEXT NOT NULL DEFAULT 'Edible'
+    CHECK (waste_type IN ('Edible', 'Non-edible')),
   quantity TEXT NOT NULL,
   quantity_value NUMERIC(10, 2) NOT NULL CHECK (quantity_value > 0),
   preparation_time TEXT NOT NULL,
@@ -44,6 +46,11 @@ CREATE TABLE IF NOT EXISTS food_batches (
 
 ALTER TABLE food_batches
   ADD COLUMN IF NOT EXISTS assigned_shelter TEXT;
+ALTER TABLE food_batches
+  ADD COLUMN IF NOT EXISTS waste_type TEXT NOT NULL DEFAULT 'Edible';
+ALTER TABLE food_batches DROP CONSTRAINT IF EXISTS food_batches_waste_type_check;
+ALTER TABLE food_batches ADD CONSTRAINT food_batches_waste_type_check
+  CHECK (waste_type IN ('Edible', 'Non-edible'));
 ALTER TABLE food_batches DROP CONSTRAINT IF EXISTS food_batches_status_check;
 UPDATE food_batches SET status = 'Awaiting Pickup' WHERE status = 'Driver En Route';
 ALTER TABLE food_batches ADD CONSTRAINT food_batches_status_check
