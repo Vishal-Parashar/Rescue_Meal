@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ResQmeal - Central Redistribution Ops</title>
+  <link rel="stylesheet" href="/css/styles.css?v=4">
+  <link rel="stylesheet" href="/css/dashboards/admin.css?v=4">
+</head>
+<body class="admin-dashboard">
+
+  <!-- Top Navbar -->
+  <header class="top-nav">
+    <div class="brand">
+      <span class="logo">ResQmeal</span>
+    </div>
+    <div class="user-meta">
+      <button class="profile-button outline-button" id="profile-button" type="button">Profile</button>
+      <button class="btn-logout outline-button" id="logout-button" type="button">Sign out</button>
+      <div class="header-profile-panel" id="header-profile-panel" hidden>
+        <div class="avatar" id="header-profile-avatar">A</div>
+        <div><span class="profile-label">Signed in as</span><strong id="profile-email">Loading...</strong><span id="profile-role">Admin</span></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard-container">
+    <!-- Metric Stat Cards -->
+    <section class="metrics-grid">
+      <div class="metric-card border-blue">
+        <span class="card-label">PREDICTED EXCESS (NEXT 24H)</span>
+        <div class="card-value" id="total-prepared">0</div>
+        <p class="card-desc">Food entered by producers</p>
+      </div>
+
+      <div class="metric-card border-amber">
+        <span class="card-label">PENDING ALLOCATIONS</span>
+        <div class="card-value" id="pending-allocations">0 Batches</div>
+        <p class="card-desc">Awaiting matching to local shelters</p>
+      </div>
+
+      <div class="metric-card border-green">
+        <span class="card-label">DISPATCH EFFICIENCY</span>
+        <div class="card-value" id="dispatch-efficiency">0%</div>
+        <p class="card-desc">Delivered batches</p>
+      </div>
+    </section>
+
+    <!-- Main Content Panels -->
+    <section class="panels-grid">
+      <!-- Matching Console -->
+      <article class="panel">
+        <h2 class="panel-title">Surplus Matching Console</h2>
+        <p class="form-status" id="admin-status" role="status" aria-live="polite"></p>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Batch</th>
+                <th>Donor</th>
+                <th>Safe Window</th>
+                <th>Best NGO requirement</th>
+                <th>Delivery partner / Action</th>
+              </tr>
+            </thead>
+            <tbody id="matchingTableBody">
+              <tr><td colspan="5">Loading producer batches...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <!-- Predictive Intelligence & Waste Analytics -->
+      <article class="panel">
+        <h2 class="panel-title">Predictive Intelligence & Waste Analytics</h2>
+        <div class="analytics-breakdown">
+          
+          <div class="metric-progress-row">
+            <span class="row-label">Total Prepared</span>
+            <div class="progress-track">
+              <div class="progress-bar bar-blue" id="prepared-bar" style="width: 0%;"></div>
+            </div>
+            <span class="row-value" id="prepared-value">0</span>
+          </div>
+
+          <div class="metric-progress-row">
+            <span class="row-label">Predicted Need</span>
+            <div class="progress-track">
+              <div class="progress-bar bar-green" id="need-bar" style="width: 0%;"></div>
+            </div>
+            <span class="row-value" id="need-value">0</span>
+          </div>
+
+          <div class="metric-progress-row">
+            <span class="row-label">Overproduction Risk</span>
+            <div class="progress-track">
+              <div class="progress-bar bar-orange" id="risk-bar" style="width: 0%;"></div>
+            </div>
+            <span class="row-value" id="risk-value">0</span>
+          </div>
+
+        </div>
+
+        <div class="prescriptive-notice">
+          <strong>Live operation:</strong> Metrics and batches below are calculated from FoodProducer submissions.
+        </div>
+      </article>
+    </section>
+
+    <section class="user-management panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Access control</p>
+          <h2 class="panel-title">Manage users</h2>
+        </div>
+        <span class="user-count" id="user-count">0 users</span>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody">
+            <tr><td colspan="6">Loading users...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/dashboards/admin.js?v=10" defer></script>
+</body>
+</html>

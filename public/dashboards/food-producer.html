@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResQmeal - Food Producer</title>
+
+    <link rel="stylesheet" href="/css/styles.css?v=4">
+    <link rel="stylesheet" href="/css/dashboards/food-producer.css?v=4">
+</head>
+
+<body class="food-producer-dashboard">
+
+    <div class="dashboard">
+
+        <!-- ================= HEADER ================= -->
+
+        <header class="topbar">
+
+            <div class="brand">
+                <span class="brand-name">ResQmeal</span>
+            </div>
+
+            <div class="user-section">
+                <button class="profile-button outline-button" id="profile-button" type="button">Profile</button>
+                <button class="logout-btn outline-button" id="logout-button" type="button">Sign out</button>
+                <div class="header-profile-panel" id="header-profile-panel" hidden><div class="avatar"
+                    id="header-profile-avatar">F</div><div><span class="profile-label">Signed in as</span><strong
+                    id="profile-email">Loading...</strong><span id="header-profile-role">FoodProducer</span>
+                    <form id="profile-form" class="profile-edit-form">
+                        <label for="profile-name">Restaurant or mess name</label>
+                        <input id="profile-name" name="displayName" maxlength="120" required>
+                        <button type="submit" class="outline-button">Save name</button>
+                        <span id="profile-status" class="form-status" role="status"></span>
+                    </form>
+                </div></div>
+            </div>
+
+        </header>
+
+
+        <!-- ================= SUMMARY CARDS ================= -->
+
+        <section class="summary-grid">
+
+            <!-- Today's Batches -->
+
+            <div class="summary-card blue-card">
+
+                <div class="card-title">
+                    TODAY'S BATCHES UPLOADED
+                </div>
+
+                <div class="card-value">
+                    <span id="today-batches">0</span> Batches
+                </div>
+
+                <div class="card-description">
+                    <span id="today-quantity">0</span> servings logged
+                </div>
+
+            </div>
+
+
+            <!-- Awaiting Pickup -->
+
+            <div class="summary-card orange-card">
+
+                <div class="card-title">
+                    AWAITING PICKUP
+                </div>
+
+                <div class="card-value">
+                    <span id="awaiting-servings">0</span> Servings
+                </div>
+
+                <div class="card-description">
+                    Awaiting pickup
+                </div>
+
+            </div>
+
+
+            <!-- Total Meals Saved -->
+
+            <div class="summary-card green-card">
+
+                <div class="card-title">
+                    TOTAL MEALS SALVAGED
+                </div>
+
+                <div class="card-value">
+                    <span id="salvaged-meals">0</span> Meals
+                </div>
+
+                <div class="card-description">
+                    Zero edible waste this month
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="panel inventory-panel">
+            <div class="inventory-heading">
+                <div>
+                    <p class="eyebrow">Stock control</p>
+                    <h2>Food inventory</h2>
+                </div>
+                <p class="form-status" id="inventory-status" role="status" aria-live="polite"></p>
+            </div>
+            <form id="inventory-form" class="inventory-form">
+                <input id="inventory-item" placeholder="Item name" required>
+                <select id="inventory-category" required>
+                    <option value="">Category</option>
+                    <option>Raw material</option>
+                    <option>Cooked food</option>
+                    <option>Packaged food</option>
+                    <option>Bakery</option>
+                </select>
+                <input id="inventory-quantity" type="number" min="0.01" step="0.01" placeholder="Quantity" required>
+                <select id="inventory-unit" required>
+                    <option value="">Unit</option>
+                    <option>kg</option>
+                    <option>litres</option>
+                    <option>servings</option>
+                    <option>packets</option>
+                </select>
+                <label class="inventory-field">
+                    <span>Expiry date</span>
+                    <input id="inventory-expiry" type="date" required>
+                </label>
+                <input id="inventory-barcode" placeholder="Barcode (optional)" inputmode="numeric">
+                <button class="scan-barcode-button" id="scan-barcode" type="button">Scan barcode</button>
+                <button class="upload-btn" type="submit">Add stock</button>
+            </form>
+            <div class="barcode-scanner" id="barcode-scanner" hidden>
+                <video id="barcode-video" playsinline></video>
+                <p class="form-status" id="barcode-status" role="status" aria-live="polite">Point the camera at a barcode.</p>
+                <button class="outline-button" id="stop-barcode" type="button">Stop scanning</button>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>Item</th><th>Category</th><th>Barcode</th><th>Quantity</th><th>Expiry</th><th>Action</th></tr></thead>
+                    <tbody id="inventory-table"><tr><td colspan="5">Loading inventory...</td></tr></tbody>
+                </table>
+            </div>
+        </section>
+
+
+        <!-- ================= MAIN CONTENT ================= -->
+
+        <section class="main-grid">
+
+
+            <!-- ================= UPLOAD PANEL ================= -->
+
+            <div class="panel upload-panel">
+
+                <h2>
+                    Upload Extra / Surplus Food
+                </h2>
+
+
+                <form id="surplusForm">
+
+
+                    <!-- Food Item -->
+
+                    <div class="form-group">
+
+                        <label for="foodDescription">
+                            Food Item Description 
+                        </label>
+
+                        <input
+                            type="text"
+                            id="foodDescription"
+                            placeholder="Enter food item description"
+                            required>
+
+                    </div>
+
+
+                    <!-- Food Category -->
+
+                    <div class="form-group">
+
+                        <label for="foodCategory">
+                            Food Category
+                        </label>
+
+                        <select
+                            id="foodCategory"
+                            required>
+
+                            <option value="cooked-hot">
+                                Cooked Hot Food
+                            </option>
+
+                            <option value="cooked-cold">
+                                Cooked Cold Food
+                            </option>
+
+                            <option value="bakery">
+                                Bakery Products
+                            </option>
+
+                            <option value="raw">
+                                Raw Food Material
+                            </option>
+
+                            <option value="packaged">
+                                Packaged Food
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- Quantity -->
+
+                    <div class="form-group">
+
+                        <label for="quantity">
+                            Quantity (Servings / kg)
+                        </label>
+
+                        <input
+                            type="text"
+                            id="quantity"
+                            placeholder="Enter quantity"
+                            required>
+
+                    </div>
+
+
+                    <!-- Preparation Timestamp -->
+
+                    <div class="form-group">
+
+                        <label for="timestamp">
+                            Preparation Timestamp
+                        </label>
+
+                        <input
+                            type="text"
+                            id="timestamp"
+                            placeholder="Enter preparation time"
+                            required>
+
+                    </div>
+
+
+                    <!-- Submit -->
+
+                    <button
+                        type="submit"
+                        class="upload-btn">
+
+                        Upload to Redistribution Pool
+
+                    </button>
+
+                </form>
+
+            </div>
+
+
+            <!-- ================= ACTIVE BATCHES ================= -->
+
+            <div class="panel batches-panel">
+
+                <h2>
+                    Active Batches &amp; Release Confirmation
+                </h2>
+
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Batch ID
+                                </th>
+
+                                <th>
+                                    Food Item
+                                </th>
+
+                                <th>
+                                    Qty
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Donor Release OTP
+                                </th>
+
+                                <th>
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="batches-table"></tbody>
+
+                    </table>
+
+                </div>
+
+
+                <!-- Security Message -->
+
+                <div class="security-note">
+
+                    Security rule:
+                    Disclose the release OTP only after the driver arrives and
+                    presents insulated food carriers.
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <script src="/js/dashboards/food-producer.js?v=12" defer></script>
+
+</body>
+</html>

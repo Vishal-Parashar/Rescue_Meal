@@ -1,0 +1,435 @@
+$ink: #19352d;
+$muted: #70827b;
+$green: #2f7d61;
+$green-dark: #205c48;
+$cream: #f7f8f4;
+$line: #dce5df;
+$white: #ffffff;
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: $ink;
+  background: $cream;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+a {
+  color: $green-dark;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.auth-shell {
+  display: grid;
+  min-height: 100vh;
+  grid-template-columns: minmax(320px, 0.9fr) minmax(420px, 1.1fr);
+}
+
+.brand-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(2rem, 6vw, 5rem);
+  color: $white;
+  background: $green-dark;
+  background-image: radial-gradient(circle at 20% 85%, rgba(137, 196, 152, 0.28), transparent 34%), linear-gradient(145deg, $green-dark, #173c32);
+}
+
+.brand, .mobile-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: inherit;
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.brand:hover {
+  text-decoration: none;
+}
+
+.brand-mark {
+  display: grid;
+  width: 2.2rem;
+  height: 2.2rem;
+  place-items: center;
+  border-radius: 0.75rem;
+  color: $green-dark;
+  background: #b9e4ae;
+  font-size: 1.6rem;
+  font-style: italic;
+  font-weight: 900;
+}
+
+.brand-message {
+  max-width: 27rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.9rem;
+  color: $green;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.brand-panel .eyebrow {
+  color: #b9e4ae;
+}
+
+h1, h2, p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 1.25rem;
+  font-size: clamp(2.4rem, 5vw, 4.6rem);
+  line-height: 0.98;
+  letter-spacing: -0.07em;
+}
+
+.brand-message > p:last-child {
+  max-width: 23rem;
+  color: #d1e4d9;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.brand-footer {
+  margin: 0;
+  color: #b3ccc1;
+  font-size: 0.85rem;
+}
+
+.form-panel {
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  background: $cream;
+}
+
+.form-card {
+  width: min(100%, 28rem);
+}
+
+.mobile-brand {
+  display: none;
+  margin-bottom: 3rem;
+  color: $ink;
+}
+
+h2 {
+  margin-bottom: 0.75rem;
+  font-size: clamp(1.8rem, 4vw, 2.35rem);
+  letter-spacing: -0.055em;
+}
+
+.form-intro {
+  margin-bottom: 2.25rem;
+  color: $muted;
+  line-height: 1.6;
+}
+
+.field {
+  margin-bottom: 1.25rem;
+}
+
+.field-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.55rem;
+  color: $ink;
+  font-size: 0.85rem;
+  font-weight: 750;
+}
+
+.field-heading a {
+  font-size: 0.78rem;
+}
+
+input[type="email"], input[type="password"] {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border: 1px solid $line;
+  border-radius: 0.65rem;
+  outline: none;
+  color: $ink;
+  background: $white;
+  font: inherit;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+input:focus {
+  border-color: $green;
+  box-shadow: 0 0 0 3px rgba(47, 125, 97, 0.14);
+}
+
+.password-input {
+  position: relative;
+}
+
+.password-input input {
+  padding-right: 4rem;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.8rem;
+  border: 0;
+  color: $green-dark;
+  background: transparent;
+  font-weight: 750;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.field-error {
+  display: block;
+  min-height: 1.15rem;
+  margin-top: 0.35rem;
+  color: #b34c4c;
+  font-size: 0.75rem;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0.2rem 0 1.5rem;
+  color: $muted;
+  font-size: 0.82rem;
+  font-weight: 550;
+}
+
+.remember-me input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: $green;
+}
+
+.submit-button {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.15rem;
+  border: 0;
+  border-radius: 0.65rem;
+  color: $white;
+  background: $green;
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.submit-button:hover {
+  background: $green-dark;
+  transform: translateY(-1px);
+}
+
+.form-status {
+  min-height: 1.25rem;
+  margin: 1rem 0 0;
+  color: $green-dark;
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+.signup-prompt {
+  margin: 2rem 0 0;
+  color: $muted;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .auth-shell {
+    display: block;
+  }
+
+  .brand-panel {
+    display: none;
+  }
+
+  .form-panel {
+    min-height: 100vh;
+    padding: 1.5rem;
+  }
+
+  .mobile-brand {
+    display: inline-flex;
+  }
+}
+
+.dashboard-page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 2rem;
+}
+
+.dashboard-card {
+  width: min(100%, 34rem);
+  padding: 3rem;
+  border: 1px solid $line;
+  border-radius: 1rem;
+  background: $white;
+  box-shadow: 0 1.5rem 4rem rgba(25, 53, 45, 0.08);
+}
+
+.dashboard-card h1 {
+  margin-bottom: 1rem;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+}
+
+.dashboard-card p:not(.eyebrow) {
+  color: $muted;
+  line-height: 1.6;
+}
+
+.dashboard-link {
+  margin-top: 2rem;
+  text-decoration: none;
+}
+
+.dashboard-header {
+  position: relative;
+}
+
+.dashboard-header .dashboard-actions {
+  order: initial;
+  margin-left: auto;
+  position: relative;
+}
+
+.header-profile-panel {
+  right: 0;
+  left: auto;
+}
+
+.profile-edit-form {
+  display: grid;
+  gap: .45rem;
+  margin-top: .75rem;
+  min-width: 14rem;
+}
+
+.admin-dashboard .header-profile-panel,
+.delivery-partner-dashboard .header-profile-panel,
+.food-producer-dashboard .header-profile-panel,
+.ngo-dashboard .header-profile-panel {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.profile-edit-form .outline-button {
+  width: 100%;
+}
+
+.profile-edit-form label {
+  margin: 0;
+  color: $muted;
+  font-size: .72rem;
+}
+
+.profile-edit-form input {
+  width: 100%;
+  padding: .55rem .65rem;
+  border: 1px solid $line;
+  border-radius: .5rem;
+  color: $ink;
+  background: $white;
+  font: inherit;
+  font-size: .78rem;
+}
+
+.profile-edit-form .form-status {
+  min-height: 0;
+  margin: 0;
+  font-size: .7rem;
+  text-align: left;
+}
+
+/* Shared dashboard visual language */
+.admin-dashboard,
+.delivery-partner-dashboard,
+.food-producer-dashboard,
+.ngo-dashboard {
+  min-height: 100vh;
+  color: $ink;
+  background: $cream;
+}
+
+.admin-dashboard .metric-card,
+.delivery-partner-dashboard .metric-card,
+.food-producer-dashboard .summary-card,
+.ngo-dashboard .dashboard-card {
+  border: 1px solid $line;
+  border-radius: 1rem;
+  background: $white;
+  box-shadow: 0 1rem 3rem rgba(25, 53, 45, .06);
+}
+
+.food-producer-dashboard .summary-card {
+  color: $ink;
+}
+
+.food-producer-dashboard .blue-card { border-left: 4px solid #397696; }
+.food-producer-dashboard .orange-card { border-left: 4px solid #d6953d; }
+.food-producer-dashboard .green-card { border-left: 4px solid $green; }
+.food-producer-dashboard .card-description { color: $muted; }
+
+.admin-dashboard .panel,
+.delivery-partner-dashboard .panel,
+.food-producer-dashboard .panel {
+  border-radius: 1rem;
+  box-shadow: 0 1rem 3rem rgba(25, 53, 45, .06);
+}
+
+.assignment-list { display: grid; gap: .75rem; }
+.assignment-item {
+  display: grid;
+  gap: .3rem;
+  padding: 1rem;
+  border: 1px solid rgba(185, 228, 174, .3);
+  border-radius: .7rem;
+  color: #edf7f0;
+  background: $green-dark;
+  font-size: .8rem;
+  line-height: 1.45;
+}
+.assignment-item span { color: #d1e4d9; }
+.empty-state { color: $muted; font-size: .85rem; }
+.form-status { min-height: 1.25rem; }
+.dashboard-page .custom-select,
+.delivery-partner-dashboard .custom-select {
+  width: 100%;
+  padding: .65rem .75rem;
+  border: 1px solid $line;
+  border-radius: .55rem;
+  color: $ink;
+  background: $white;
+  font: inherit;
+  font-size: .8rem;
+}
+
+@media (max-width: 760px) {
+  .food-producer-dashboard .summary-grid { padding-top: 1.5rem; }
+}

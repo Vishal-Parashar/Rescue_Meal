@@ -1,0 +1,348 @@
+.food-producer-dashboard {
+    min-height: 100vh;
+    padding: 0;
+    background: $cream;
+    color: $ink;
+
+    .dashboard {
+        width: min(100% - 3rem, 76rem);
+        margin: 0 auto;
+        padding-bottom: 3rem;
+    }
+
+    .food-producer-dashboard .user-section { order: initial; margin-left: auto; position: relative; }
+    .food-producer-dashboard .header-profile-panel { position: absolute; top: calc(100% + .6rem); left: auto; right: 0; z-index: 5; display: flex; align-items: center; gap: .75rem; min-width: 15rem; padding: 1rem; border: 1px solid $line; border-radius: .8rem; background: $white; box-shadow: 0 1rem 3rem rgba(25,53,45,.12); }
+    .food-producer-dashboard .header-profile-panel[hidden] { display: none; }
+
+    .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 2rem;
+        padding: 1.5rem 0 3.5rem;
+        border-bottom: 1px solid $line;
+    }
+
+    .brand {
+        color: $ink;
+    }
+
+    .brand-name {
+        font-size: 1.4rem;
+        font-weight: 850;
+        letter-spacing: -0.05em;
+    }
+
+    .sih-badge {
+        margin-left: .6rem;
+        padding: .3rem .55rem;
+        border-radius: .4rem;
+        color: $green-dark;
+        background: #b9e4ae;
+        font-size: .68rem;
+        font-weight: 800;
+    }
+
+    .user-section {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .logged-user {
+        color: $muted;
+        font-size: .78rem;
+    }
+
+    .logged-user strong {
+        display: block;
+        margin-top: .2rem;
+        color: $ink;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        padding: 2rem 0;
+    }
+
+    .summary-card {
+        padding: 1.4rem;
+        border-radius: .8rem;
+        color: $white;
+        box-shadow: 0 1rem 2.5rem rgba(25, 53, 45, .08);
+    }
+
+    .blue-card {
+        background: #397696;
+    }
+
+    .orange-card {
+        background: #bd7c3b;
+    }
+
+    .green-card {
+        background: $green;
+    }
+
+    .card-title {
+        font-size: .72rem;
+        font-weight: 800;
+        letter-spacing: .1em;
+    }
+
+    .card-value {
+        margin: .8rem 0 .4rem;
+        font-size: 1.55rem;
+        font-weight: 800;
+        letter-spacing: -.04em;
+    }
+
+    .card-description {
+        color: rgba(255, 255, 255, .8);
+        font-size: .8rem;
+    }
+
+    .main-grid {
+        display: grid;
+        grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
+        gap: 1.25rem;
+    }
+
+    .panel {
+        padding: 1.5rem;
+        border: 1px solid $line;
+        border-radius: 1rem;
+        background: $white;
+        box-shadow: 0 1rem 3rem rgba(25, 53, 45, .05);
+    }
+
+    .panel h2 {
+        margin-bottom: 1.5rem;
+        font-size: 1.35rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.15rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: .5rem;
+        color: $ink;
+        font-size: .8rem;
+        font-weight: 750;
+    }
+
+    input,
+    select {
+        width: 100%;
+        padding: .78rem .85rem;
+        border: 1px solid $line;
+        border-radius: .55rem;
+        outline: 0;
+        color: $ink;
+        background: $white;
+        font: inherit;
+        font-size: .85rem;
+    }
+
+    input:focus,
+    select:focus {
+        border-color: $green;
+        box-shadow: 0 0 0 3px rgba(47, 125, 97, .13);
+    }
+
+    .upload-btn {
+        width: 100%;
+        padding: .9rem 1rem;
+        border: 0;
+        border-radius: .55rem;
+        color: $white;
+        background: $green;
+        font: inherit;
+        font-weight: 750;
+        cursor: pointer;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: .8rem;
+    }
+
+    th,
+    td {
+        padding: .85rem .6rem;
+        border-bottom: 1px solid #edf1ee;
+        text-align: left;
+    }
+
+    th {
+        color: $muted;
+        font-size: .67rem;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .status {
+        display: inline-block;
+        padding: .3rem .5rem;
+        border-radius: 2rem;
+        font-size: .68rem;
+        font-weight: 750;
+    }
+
+    .status-orange {
+        color: #8a5b20;
+        background: #fff3d9;
+    }
+
+    .status-green {
+        color: #267052;
+        background: #e5f3e9;
+    }
+
+    .delete-batch-button {
+        padding: .45rem .65rem;
+        border: 1px solid #e7b7b7;
+        border-radius: .45rem;
+        color: #a64242;
+        background: #fff7f7;
+        font: inherit;
+        font-size: .72rem;
+        font-weight: 750;
+        cursor: pointer;
+    }
+
+    .delete-batch-button:hover {
+        background: #fdeaea;
+    }
+
+    .delete-batch-button:disabled {
+        cursor: wait;
+        opacity: .6;
+    }
+
+    .action-muted {
+        color: $muted;
+        font-size: .72rem;
+    }
+
+    .security-note {
+        margin-top: 1rem;
+        padding: .8rem;
+        border-left: 3px solid #d6953d;
+        color: $muted;
+        background: #fff9ec;
+        font-size: .76rem;
+        line-height: 1.5;
+    }
+
+    .inventory-panel {
+        margin-top: 1.25rem;
+    }
+
+    .inventory-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .inventory-heading h2 {
+        margin-bottom: 1rem;
+    }
+
+    .inventory-form {
+        display: grid;
+        grid-template-columns: 1.4fr 1.2fr .8fr .8fr 1fr auto;
+        gap: .7rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .inventory-form .upload-btn {
+        width: auto;
+        white-space: nowrap;
+    }
+
+    .inventory-field {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: .35rem;
+        margin: 0;
+        color: $muted;
+        font-size: .72rem;
+        font-weight: 750;
+    }
+
+    .inventory-field input {
+        width: 100%;
+    }
+
+    .inventory-date-row th {
+        padding: .7rem .6rem;
+        color: $green-dark;
+        background: #eef6f0;
+        font-size: .72rem;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+
+    .scan-barcode-button {
+        padding: .78rem .85rem;
+        border: 1px solid $line;
+        border-radius: .55rem;
+        color: $green-dark;
+        background: #eef6f0;
+        font: inherit;
+        font-size: .8rem;
+        font-weight: 750;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .barcode-scanner {
+        display: grid;
+        max-width: 28rem;
+        gap: .6rem;
+        margin: 0 0 1.25rem;
+    }
+
+    .barcode-scanner[hidden] {
+        display: none;
+    }
+
+    .barcode-scanner video {
+        width: 100%;
+        min-height: 12rem;
+        border-radius: .7rem;
+        object-fit: cover;
+        background: #17251f;
+    }
+
+    @media (max-width: 800px) {
+        .topbar {
+            align-items: flex-start;
+            flex-direction: column;
+            padding-bottom: 2rem;
+        }
+
+        .user-section {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .summary-grid,
+        .main-grid,
+        .inventory-form {
+            grid-template-columns: 1fr;
+        }
+
+        .dashboard {
+            width: min(100% - 2rem, 76rem);
+        }
+    }
+}

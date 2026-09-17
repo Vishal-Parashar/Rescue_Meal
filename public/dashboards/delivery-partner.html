@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ResQmeal - Delivery Volunteer Portal</title>
+  <link rel="stylesheet" href="/css/styles.css?v=4">
+  <link rel="stylesheet" href="/css/dashboards/delivery-partner.css?v=4">
+</head>
+<body class="delivery-partner-dashboard">
+
+  <!-- Header Navigation -->
+  <header class="top-nav">
+    <div class="brand">
+      <span class="logo">ResQmeal</span>
+    </div>
+    <div class="user-meta">
+      <button class="profile-button outline-button" id="profile-button" type="button">Profile</button>
+      <button class="btn-logout outline-button" id="logout-button" type="button">Sign out</button>
+      <div class="header-profile-panel" id="header-profile-panel" hidden>
+        <div class="avatar" id="header-profile-avatar">D</div>
+        <div><span class="profile-label">Signed in as</span><strong id="header-profile-email">Loading...</strong><span id="header-profile-role">Delivery partner</span></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Dashboard Container -->
+  <main class="dashboard-container">
+    
+    <!-- Status & Driver Metric Cards -->
+    <section class="metrics-grid">
+      <div class="metric-card border-blue">
+        <span class="card-label">DRIVER NAME</span>
+        <div class="card-value" id="driver-name">Loading...</div>
+        <p class="card-desc">Active delivery partner</p>
+      </div>
+
+      <div class="metric-card border-amber">
+        <span class="card-label">ACTIVE ASSIGNMENT</span>
+        <div class="card-value" id="active-assignment">0 Batches</div>
+        <p class="card-desc">Assignments ready for pickup</p>
+      </div>
+
+      <div class="metric-card border-green">
+        <span class="card-label">ON-TIME COMPLETION</span>
+        <div class="card-value" id="on-time-completion">0%</div>
+        <p class="card-desc">Completed deliveries this session</p>
+      </div>
+    </section>
+
+    <!-- Operational Panels -->
+    <section class="panels-grid">
+      
+      <!-- Transit Route Console -->
+      <article class="panel">
+        <h2 class="panel-title">Transit Route Feasibility</h2>
+        <div class="assignment-list" id="assignment-list"></div>
+      </article>
+
+      <!-- Two-Tier Verification -->
+      <article class="panel">
+        <h2 class="panel-title">Two-Tier OTP Verification</h2>
+        <div class="otp-verification-container">
+          
+          <div class="step-row step-two">
+            <label for="active-batch" class="step-label">Select an assignment. Verify pickup with the producer OTP, then verify delivery with the NGO OTP:</label>
+            <select id="active-batch" class="custom-select" aria-label="Active assignment"></select>
+            <div class="otp-input-group">
+              <input 
+                type="text" 
+                id="shelterOtp" 
+                class="otp-input" 
+                placeholder="Enter required OTP" 
+                maxlength="6"
+                autocomplete="off"
+              >
+              <button type="button" class="btn-verify">Verify<br>OTP</button>
+            </div>
+            <p class="form-status" id="delivery-status" role="status" aria-live="polite"></p>
+          </div>
+
+        </div>
+      </article>
+
+    </section>
+  </main>
+
+    <script src="/js/dashboards/delivery-partner.js?v=5" defer></script>
+  </body>
+  </html>

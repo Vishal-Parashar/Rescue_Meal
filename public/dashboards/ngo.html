@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NGO dashboard | resQmeal</title>
+    <link rel="stylesheet" href="/css/styles.css?v=6">
+    <link rel="stylesheet" href="/css/dashboards/ngo.css?v=6">
+</head>
+
+<body class="dashboard-page ngo-dashboard">
+    <main class="dashboard-shell">
+        <header class="dashboard-header"><a class="brand" href="/"><span
+                    class="brand-mark">r</span><span>resQmeal</span></a>
+            <div class="dashboard-actions"><button class="outline-button profile-button" id="profile-button"
+                    type="button">Profile</button><button class="outline-button" id="logout-button" type="button">Sign
+                    out</button>
+                <div class="header-profile-panel" id="header-profile-panel" hidden>
+                    <div class="avatar" id="header-profile-avatar">N</div>
+                    <div><span class="profile-label">Signed in as</span><strong
+                            id="header-profile-email">Loading...</strong><span id="header-profile-role">NGO</span>
+                            <form id="profile-form" class="profile-edit-form">
+                                <label for="profile-name">NGO name</label>
+                                <input id="profile-name" name="displayName" maxlength="120" required>
+                                <button type="submit" class="outline-button">Save name</button>
+                                <span id="profile-status" class="form-status" role="status"></span>
+                            </form>
+                </div>
+                </div>
+            </div>
+        </header>
+        <section class="dashboard-hero">
+            <div>
+                <p class="eyebrow">Community workspace</p>
+                <h1>NGO dashboard</h1>
+                <p>Coordinate food rescue efforts and support your community.</p>
+            </div>
+            <div class="profile-card">
+                <div class="avatar" id="profile-avatar">N</div>
+                <div><span class="profile-label">Signed in as</span><strong id="profile-email">Loading...</strong><span
+                        id="profile-role">NGO</span></div>
+            </div>
+        </section>
+        <section class="dashboard-card role-content">
+            <p class="eyebrow">Matched deliveries</p>
+            <h2>Incoming food</h2>
+            <div class="requirements-list" id="ngo-deliveries"></div>
+        </section>
+        <section class="ngo-grid">
+            <section class="dashboard-card role-content">
+                <p class="eyebrow">Request support</p>
+                <h2>Enter food requirements</h2>
+                <p class="form-intro">Tell local FoodProducers what your community needs.</p>
+                <form id="requirement-form">
+                    <div class="field"><label for="food-description">Food description</label><input
+                            id="food-description" name="foodDescription" placeholder="Rice, dal and vegetables"
+                            required></div>
+                    <div class="field"><label for="food-category">Food category</label><select id="food-category"
+                            name="foodCategory" required>
+                            <option value="">Choose a category</option>
+                            <option>Cooked meal</option>
+                            <option>Packaged food</option>
+                            <option>Fresh produce</option>
+                            <option>Bakery</option>
+                            <option>Drinking water</option>
+                        </select></div>
+                    <div class="field"><label for="servings">Servings required</label><input id="servings"
+                            name="servings" type="number" min="1" required></div>
+                    <div class="field"><label for="needed-by">Needed by</label><input id="needed-by" name="neededBy"
+                            type="datetime-local" required></div>
+                    <div class="field"><label for="notes">Notes <span
+                                class="optional">(optional)</span></label><textarea id="notes" name="notes" rows="3"
+                            placeholder="Allergy, delivery, or packaging details"></textarea></div>
+                    <button class="submit-button" type="submit">Submit requirement <span
+                            aria-hidden="true">→</span></button>
+                    <p class="form-status" id="requirement-status" role="status"></p>
+                </form>
+            </section>
+            <section class="dashboard-card role-content">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">Your requests</p>
+                        <h2>Food requirements</h2>
+                    </div><button class="outline-button" id="refresh-requirements" type="button">Refresh</button>
+                </div>
+                <div class="requirements-list" id="requirements-list"></div>
+            </section>
+        </section>
+    </main>
+    <script src="/js/dashboards/ngo.js?v=9" defer></script>
+</body>
+
+</html>

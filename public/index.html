@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sign in to resQmeal">
+  <title>Sign in | resQmeal</title>
+  <link rel="stylesheet" href="/css/styles.css?v=4">
+</head>
+<body>
+  <main class="auth-shell">
+    <section class="brand-panel" aria-label="About resQmeal">
+      <a class="brand" href="/" aria-label="resQmeal home">
+        <span class="brand-mark" aria-hidden="true">r</span>
+        <span>resQmeal</span>
+      </a>
+      <div class="brand-message">
+        <p class="eyebrow">Good food. Less waste.</p>
+        <h1>Make every meal matter.</h1>
+        <p>Manage your restaurant, rescue surplus food, and create a better tomorrow from one simple workspace.</p>
+      </div>
+      <p class="brand-footer">Made for teams that care.</p>
+    </section>
+
+    <section class="form-panel">
+      <div class="form-card">
+        <div class="mobile-brand">
+          <span class="brand-mark" aria-hidden="true">r</span>
+          <span>resQmeal</span>
+        </div>
+        <p class="eyebrow">Welcome back</p>
+        <h2>Sign in to your account</h2>
+        <p class="form-intro">Enter your details to continue to your dashboard.</p>
+
+        <form id="login-form" novalidate>
+          <div class="field">
+            <label for="email">Email address</label>
+            <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+            <span class="field-error" data-error-for="email"></span>
+          </div>
+
+          <div class="field">
+            <div class="field-heading">
+              <label for="password">Password</label>
+              <a href="#forgot-password" data-view="forgot">Forgot password?</a>
+            </div>
+            <div class="password-input">
+              <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required minlength="6">
+              <button class="password-toggle" type="button" aria-label="Show password" data-password-toggle>
+                <span aria-hidden="true">Show</span>
+              </button>
+            </div>
+            <span class="field-error" data-error-for="password"></span>
+          </div>
+
+          <label class="remember-me">
+            <input type="checkbox" name="remember">
+            <span>Remember me</span>
+          </label>
+
+          <button class="submit-button" type="submit">Sign in <span aria-hidden="true">→</span></button>
+          <p class="form-status" role="status" aria-live="polite"></p>
+        </form>
+
+        <p class="signup-prompt">New to resQmeal? <a href="#create-account" data-view="register">Create an account</a></p>
+
+        <form id="register-form" class="secondary-form" hidden>
+          <p class="eyebrow">Join resQmeal</p>
+          <h2>Create an account</h2>
+          <div class="field"><label for="register-email">Email address</label><input id="register-email" name="email" type="email" required></div>
+          <div class="field"><label for="register-password">Password</label><input id="register-password" name="password" type="password" minlength="6" required></div>
+          <div class="field"><label for="register-role">Role</label><select id="register-role" name="role" required><option value="">Choose a role</option><option>NGO</option><option>FoodProducer</option><option>delivery partner</option><option>Admin</option></select></div>
+          <button class="submit-button" type="submit">Create account <span aria-hidden="true">→</span></button>
+          <p class="form-status" role="status"></p>
+          <p class="signup-prompt"><a href="#login" data-view="login">Back to sign in</a></p>
+        </form>
+
+        <form id="forgot-form" class="secondary-form" hidden>
+          <p class="eyebrow">Account recovery</p>
+          <h2>Reset your password</h2>
+          <p class="form-intro">Enter your email. In this local setup, the reset token is printed in the server console.</p>
+          <div class="field"><label for="forgot-email">Email address</label><input id="forgot-email" name="email" type="email" required></div>
+          <button class="submit-button" type="submit">Send reset link <span aria-hidden="true">→</span></button>
+          <p class="form-status" role="status"></p>
+          <p class="signup-prompt"><a href="#login" data-view="login">Back to sign in</a></p>
+        </form>
+
+        <form id="reset-form" class="secondary-form" hidden>
+          <p class="eyebrow">Choose a new password</p>
+          <h2>Set new password</h2>
+          <div class="field"><label for="reset-token">Reset token</label><input id="reset-token" name="token" required></div>
+          <div class="field"><label for="reset-password">New password</label><input id="reset-password" name="password" type="password" minlength="6" required></div>
+          <button class="submit-button" type="submit">Update password <span aria-hidden="true">→</span></button>
+          <p class="form-status" role="status"></p>
+          <p class="signup-prompt"><a href="#login" data-view="login">Back to sign in</a></p>
+        </form>
+      </div>
+    </section>
+  </main>
+  <script src="/js/login.js" defer></script>
+</body>
+</html>
