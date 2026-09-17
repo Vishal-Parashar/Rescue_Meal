@@ -313,6 +313,57 @@ input:focus {
   left: auto;
 }
 
+.outline-button {
+  display: inline-flex;
+  min-height: 2.35rem;
+  justify-content: center;
+  align-items: center;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid #dce5df;
+  border-radius: 0.55rem;
+  color: #205c48;
+  background: #ffffff;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 750;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 160ms ease, color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.outline-button:hover {
+  border-color: #2f7d61;
+  color: #ffffff;
+  background: #2f7d61;
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.outline-button:focus-visible {
+  outline: 3px solid rgba(47, 125, 97, 0.2);
+  outline-offset: 2px;
+}
+
+.outline-button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+  transform: none;
+}
+
+.dashboard-actions,
+.user-meta,
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.dashboard-actions .outline-button,
+.user-meta .outline-button,
+.user-section .outline-button {
+  white-space: nowrap;
+}
+
 .profile-edit-form {
   display: grid;
   gap: 0.45rem;

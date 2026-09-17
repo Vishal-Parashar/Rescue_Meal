@@ -325,6 +325,57 @@ input:focus {
   left: auto;
 }
 
+.outline-button {
+  display: inline-flex;
+  min-height: 2.35rem;
+  justify-content: center;
+  align-items: center;
+  padding: .55rem .85rem;
+  border: 1px solid $line;
+  border-radius: .55rem;
+  color: $green-dark;
+  background: $white;
+  font: inherit;
+  font-size: .78rem;
+  font-weight: 750;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 160ms ease, color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.outline-button:hover {
+  border-color: $green;
+  color: $white;
+  background: $green;
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.outline-button:focus-visible {
+  outline: 3px solid rgba(47, 125, 97, .2);
+  outline-offset: 2px;
+}
+
+.outline-button:disabled {
+  cursor: wait;
+  opacity: .6;
+  transform: none;
+}
+
+.dashboard-actions,
+.user-meta,
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+}
+
+.dashboard-actions .outline-button,
+.user-meta .outline-button,
+.user-section .outline-button {
+  white-space: nowrap;
+}
+
 .profile-edit-form {
   display: grid;
   gap: .45rem;
