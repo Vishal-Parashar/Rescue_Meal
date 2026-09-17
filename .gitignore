@@ -2,3 +2,4 @@ node_modules/
 .env
 scripts/setup-database.js
 scripts/.scss-entry/
+.neon
