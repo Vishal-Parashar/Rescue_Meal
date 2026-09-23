@@ -3,17 +3,27 @@
   padding: 0;
   background: $cream;
   color: $ink;
+  overflow-x: hidden;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
 
   .top-nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 2rem;
+    gap: 1rem;
     width: min(100% - 3rem, 76rem);
     margin: 0 auto 2rem;
-    padding: 1.5rem 0 3.5rem;
+    padding: .8rem 0 1rem;
     border-bottom: 1px solid $line;
-    background: transparent;
+    background: $cream;
     color: $ink;
   }
 
@@ -22,6 +32,11 @@
   }
 
   .top-nav .brand {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .5rem;
+    min-width: 0;
     color: $ink;
   }
 
@@ -39,6 +54,35 @@
     background: #b9e4ae;
     font-size: .68rem;
     font-weight: 800;
+  }
+
+  .admin-menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+  }
+
+  .admin-menu button {
+    min-height: 2rem;
+    padding: .38rem .7rem;
+    border: 1px solid $line;
+    border-radius: .35rem;
+    color: $green-dark;
+    background: $white;
+    font: inherit;
+    font-size: .72rem;
+    font-weight: 750;
+    cursor: pointer;
+    transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
+  }
+
+  .admin-menu button:hover,
+  .admin-menu button:focus-visible,
+  .admin-menu button.active {
+    border-color: $green;
+    color: $white;
+    background: $green;
+    outline: 0;
   }
 
   .user-meta {
@@ -89,6 +133,16 @@
     width: min(100% - 3rem, 76rem);
     margin: 0 auto;
     padding-bottom: 3rem;
+    min-width: 0;
+  }
+
+  #admin-overview,
+  #redistribution-management,
+  #waste-analytics,
+  #redistribution-requests,
+  #esg-score,
+  #user-management {
+    scroll-margin-top: 6rem;
   }
 
   .admin-intro {
@@ -138,6 +192,7 @@
   }
 
   .metric-card {
+    min-width: 0;
     padding: 1.4rem;
     border: 0;
     border-left: 4px solid transparent;
@@ -186,6 +241,7 @@
   }
 
   .panel {
+    min-width: 0;
     padding: 1.5rem;
     border: 1px solid $line;
     border-radius: 1rem;
@@ -472,6 +528,30 @@
     margin-bottom: 0;
   }
 
+  .admin-create-form {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    align-items: end;
+  }
+
+  .admin-create-form label {
+    display: grid;
+    gap: .4rem;
+    color: $muted;
+    font-size: .78rem;
+    font-weight: 700;
+  }
+
+  .admin-create-form input {
+    width: 100%;
+  }
+
+  .admin-create-form .form-status {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+
   .user-count {
     color: $muted;
     font-size: .8rem;
@@ -496,6 +576,15 @@
     .data-table {
       min-width: 42rem;
     }
+
+    #admin-overview,
+    #redistribution-management,
+    #waste-analytics,
+    #redistribution-requests,
+    #esg-score,
+    #user-management {
+      scroll-margin-top: 8rem;
+    }
   }
 
   @media (max-width: 760px) {
@@ -512,7 +601,27 @@
       width: min(100% - 2rem, 76rem);
       align-items: flex-start;
       flex-direction: column;
-      padding-bottom: 2rem;
+      padding-bottom: 1rem;
+    }
+
+    .top-nav .brand,
+    .admin-menu,
+    .user-meta,
+    .dashboard-container,
+    .admin-intro,
+    .panel,
+    .metric-card {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .admin-menu {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .admin-menu button {
+      text-align: center;
     }
 
     .admin-intro h1 {
@@ -533,8 +642,18 @@
     }
 
     .user-meta {
-      width: 100%;
-      justify-content: flex-end;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .user-meta .outline-button {
+      flex: 1 1 7rem;
+    }
+
+    .header-profile-panel {
+      right: 0;
+      width: min(100vw - 2rem, 20rem);
+      min-width: 0;
     }
 
     .dashboard-container {
@@ -554,8 +673,62 @@
       padding: 1rem;
     }
 
+    .admin-create-form {
+      grid-template-columns: 1fr;
+    }
+
+    .admin-create-form .form-status {
+      grid-column: auto;
+    }
+
     .batch-details-grid {
       grid-template-columns: 1fr;
+    }
+
+    .panel-title {
+      font-size: 1.2rem;
+    }
+
+    .metric-card,
+    .panel,
+    .user-management {
+      padding: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .top-nav,
+    .dashboard-container {
+      width: calc(100% - 1.25rem);
+    }
+
+    .admin-intro h1 {
+      font-size: 1.8rem;
+    }
+
+    .admin-menu {
+      gap: .3rem;
+    }
+
+    .admin-menu button {
+      padding-inline: .4rem;
+      font-size: .68rem;
+    }
+
+    .metric-progress-row {
+      gap: .5rem;
+    }
+
+    .row-value {
+      width: auto;
+    }
+
+    .batch-modal {
+      padding: .75rem;
+    }
+
+    .batch-modal-card {
+      padding: 1rem;
     }
   }
 }

@@ -1,22 +1,109 @@
 .ngo-dashboard {
   padding: 0 0 3rem;
+  overflow-x: hidden;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
 
   .dashboard-shell {
     width: min(100% - 3rem, 76rem);
     margin: 0 auto;
+    min-width: 0;
   }
 
   .dashboard-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 2rem;
-    padding: 1.5rem 0 2rem;
+    gap: 1rem;
+    padding: .8rem 0 1rem;
     border-bottom: 1px solid $line;
+    background: $cream;
   }
 
-  .dashboard-header .brand { color: $ink; }
-  .dashboard-actions { flex-shrink: 0; }
+  .ngo-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .5rem;
+    min-width: 0;
+  }
+
+  .dashboard-header .brand {
+    color: $ink;
+    text-decoration: none;
+  }
+
+  .ngo-menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+  }
+
+  .ngo-menu button {
+    min-height: 2rem;
+    padding: .38rem .7rem;
+    border: 1px solid $line;
+    border-radius: .35rem;
+    color: $green-dark;
+    background: $white;
+    font: inherit;
+    font-size: .72rem;
+    font-weight: 750;
+    cursor: pointer;
+    transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
+  }
+
+  .ngo-menu button:hover,
+  .ngo-menu button:focus-visible,
+  .ngo-menu button.active {
+    border-color: $green;
+    color: $white;
+    background: $green;
+    outline: 0;
+  }
+
+  .dashboard-actions {
+    position: relative;
+    display: flex;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    gap: .65rem;
+  }
+
+  .dashboard-actions .header-profile-panel {
+    position: absolute;
+    top: calc(100% + .55rem);
+    right: 0;
+    z-index: 11;
+    display: flex;
+    align-items: stretch;
+    width: min(20rem, calc(100vw - 2rem));
+    min-width: 15rem;
+    padding: 1rem;
+    border: 1px solid $line;
+    border-radius: .8rem;
+    background: $white;
+    box-shadow: 0 1rem 3rem rgba(25, 53, 45, .12);
+  }
+
+  .dashboard-actions .header-profile-panel[hidden] {
+    display: none;
+  }
+
+  #ngo-overview,
+  #ngo-deliveries-section,
+  #ngo-marketplace,
+  #ngo-post-requirement,
+  #ngo-requirements {
+    scroll-margin-top: 6rem;
+  }
 
   .dashboard-hero {
     display: flex;
@@ -69,6 +156,7 @@
   }
 
   .ngo-grid {
+    min-width: 0;
     display: grid;
     grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
     gap: 1.25rem;
@@ -126,6 +214,7 @@
   }
 
   .dashboard-card {
+    min-width: 0;
     width: auto;
     padding: 1.5rem;
   }
@@ -216,8 +305,9 @@
 
   @media (max-width: 1024px) {
     .dashboard-shell { width: min(100% - 2rem, 76rem); }
-    .dashboard-header { align-items: flex-start; flex-direction: column; padding-bottom: 1.25rem; }
-    .dashboard-actions { width: 100%; justify-content: flex-end; }
+    .dashboard-header { align-items: flex-start; flex-direction: column; padding-bottom: 1rem; }
+    .dashboard-actions { width: 100%; justify-content: space-between; }
+    .ngo-menu { max-width: 100%; }
     .dashboard-hero { align-items: stretch; flex-direction: column; padding-top: 1.5rem; }
     .profile-card { width: 100%; }
     .ngo-grid {
@@ -241,6 +331,65 @@
     .dashboard-card .outline-button {
       width: 100%;
     }
+
+    #ngo-overview,
+    #ngo-deliveries-section,
+    #ngo-marketplace,
+    #ngo-post-requirement,
+    #ngo-requirements {
+      scroll-margin-top: 8rem;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .dashboard-shell {
+      width: calc(100% - 1.25rem);
+    }
+
+    .dashboard-header,
+    .ngo-brand,
+    .dashboard-actions,
+    .dashboard-hero,
+    .ngo-grid,
+    .dashboard-card {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .ngo-menu {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      width: 100%;
+    }
+
+    .ngo-menu button {
+      text-align: center;
+    }
+
+    .dashboard-actions {
+      justify-content: flex-start;
+    }
+
+    .dashboard-actions > .outline-button {
+      flex: 1 1 7rem;
+    }
+
+    .dashboard-actions .header-profile-panel {
+      right: 0;
+      width: min(100vw - 1.25rem, 20rem);
+      min-width: 0;
+    }
+
+    .marketplace-item {
+      width: 100%;
+    }
+
+    input,
+    select,
+    textarea,
+    button {
+      max-width: 100%;
+    }
   }
 
   @media (max-width: 480px) {
@@ -254,6 +403,27 @@
 
     .requirement-item {
       padding: .8rem;
+    }
+
+    .dashboard-hero {
+      padding-top: 1rem;
+    }
+
+    .dashboard-hero h1 {
+      font-size: 1.8rem;
+    }
+
+    .dashboard-card {
+      padding: .85rem;
+      border-radius: .75rem;
+    }
+
+    .dashboard-card h2 {
+      font-size: 1.15rem;
+    }
+
+    .dashboard-actions {
+      gap: .5rem;
     }
   }
 }

@@ -87,10 +87,7 @@
             <div><small>Delivery destination</small><strong id="map-destination">Select an assignment</strong></div>
           </div>
         </div>
-        <div class="map-placeholder" id="live-map" data-map-provider="todo">
-          <span>Live map container</span>
-          <small>Add your map provider and route tracking code here.</small>
-        </div>
+        <div class="map-placeholder" id="live-map" aria-label="Source to destination map"></div>
       </article>
 
       <!-- Two-Tier Verification -->
@@ -123,6 +120,8 @@
     </section>
   </main>
 
-    <script src="/js/dashboards/delivery-partner.js?v=10" defer></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+    <script type="module" src="/js/dashboards/delivery-map.js?v=1"></script>
+    <script src="/js/dashboards/delivery-partner.js?v=11" defer></script>
   </body>
   </html>

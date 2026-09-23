@@ -11,8 +11,30 @@ const dashboardFiles = {
 
 const app = express();
 const port = process.env.PORT || 3000;
+const publicRegistrationRoles = new Set(["FoodProducer", "NGO", "delivery partner"]);
 
 app.use(express.json());
+
+async function requestPythonAi(path, body) {
+  const baseUrl = String(process.env.PYTHON_AI_URL || "http://127.0.0.1:8001").replace(/\/$/, "");
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12000);
+  try {
+    const response = await fetch(`${baseUrl}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) return { available: false, error: payload.detail || `Python AI service returned HTTP ${response.status}.` };
+    return payload;
+  } catch (error) {
+    return { available: false, error: error.name === "AbortError" ? "Python AI request timed out." : "Python AI service is unavailable." };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
@@ -123,8 +145,8 @@ app.post("/api/auth/register", async (req, res, next) => {
   const email = typeof req.body.email === "string" ? req.body.email.trim().toLowerCase() : "";
   const password = typeof req.body.password === "string" ? req.body.password : "";
   const role = typeof req.body.role === "string" ? req.body.role : "";
-  if (!email || !password || password.length < 6 || !roles[role]) {
-    return res.status(400).json({ error: "Email, password (6+ characters), and a valid role are required." });
+  if (!email || !password || password.length < 6 || !publicRegistrationRoles.has(role)) {
+    return res.status(400).json({ error: "Email, password (6+ characters), and one of the public registration roles is required: Food producer, NGO, or delivery partner." });
   }
   try {
     await pool.query("INSERT INTO users (email, password_hash, role) VALUES ($1, $2, $3)", [email, hashPassword(password), role]);
@@ -218,6 +240,29 @@ app.get("/api/admin/users", async (req, res, next) => {
   }
 });
 
+app.post("/api/admin/users", async (req, res, next) => {
+  const email = typeof req.body.email === "string" ? req.body.email.trim().toLowerCase() : "";
+  const password = typeof req.body.password === "string" ? req.body.password : "";
+  const displayName = typeof req.body.displayName === "string" ? req.body.displayName.trim() : "";
+  if (!email || !password || password.length < 6 || displayName.length > 120) {
+    return res.status(400).json({ error: "Admin email, password (6+ characters), and an optional name up to 120 characters are required." });
+  }
+  try {
+    const session = await requireAdmin(req, res);
+    if (!session) return;
+    const result = await pool.query(
+      `INSERT INTO users (email, password_hash, display_name, role)
+       VALUES ($1, $2, $3, 'Admin')
+       RETURNING id, email, display_name, role, is_active, created_at`,
+      [email, hashPassword(password), displayName || null],
+    );
+    return res.status(201).json({ user: result.rows[0] });
+  } catch (error) {
+    if (error.code === "23505") return res.status(409).json({ error: "An account with that email already exists." });
+    return next(error);
+  }
+});
+
 app.patch("/api/admin/users/:id", async (req, res, next) => {
   const userId = Number(req.params.id);
   const role = typeof req.body.role === "string" ? req.body.role : "";
@@ -303,6 +348,19 @@ app.get("/api/admin/operations", async (req, res, next) => {
         dispatchEfficiency: totalBatches ? Math.round((deliveredBatches / totalBatches) * 1000) / 10 : 0,
       },
     });
+
+  } catch (error) {
+    return next(error);
+  }
+});
+
+app.post("/api/admin/ai-forecast", async (req, res, next) => {
+  try {
+    if (!await requireAdmin(req, res)) return;
+    const batches = Array.isArray(req.body.batches) ? req.body.batches.slice(0, 100) : [];
+    const requirements = Array.isArray(req.body.requirements) ? req.body.requirements.slice(0, 100) : [];
+    const result = await requestPythonAi("/forecast", { batches, requirements });
+    return res.json(result);
   } catch (error) {
     return next(error);
   }
@@ -599,6 +657,31 @@ app.get("/api/ngo/marketplace", async (req, res, next) => {
       .filter((batch) => Date.now() - new Date(batch.created_at).getTime() <= 7 * 24 * 60 * 60 * 1000)
       .reduce((sum, batch) => sum + Number(batch.quantity_value), 0);
     return res.json({ listings: result.rows, predictedExcessServings: Math.round(recentVolume / 7) });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+app.get("/api/ngo/marketplace/recommendations", async (req, res, next) => {
+  try {
+    const session = await requireRole(req, res, "NGO");
+    if (!session) return;
+    const [listings, requirements] = await Promise.all([
+      pool.query(
+        `SELECT b.id, b.food_description, b.food_category, b.quantity, b.quantity_value,
+                b.waste_type, b.preparation_time
+         FROM food_batches b WHERE b.status = 'Awaiting Pickup'
+         ORDER BY b.created_at DESC LIMIT 100`,
+      ),
+      pool.query(
+        `SELECT food_description, food_category, servings, needed_by, notes
+         FROM food_requirements WHERE ngo_id = $1 AND status = 'Open'
+         ORDER BY needed_by ASC LIMIT 50`,
+        [session.id],
+      ),
+    ]);
+    const result = await requestPythonAi("/match", { listings: listings.rows, requirements: requirements.rows });
+    return res.json(result);
   } catch (error) {
     return next(error);
   }

@@ -6,13 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NGO dashboard | resQmeal</title>
     <link rel="stylesheet" href="/css/styles.css?v=9">
-    <link rel="stylesheet" href="/css/dashboards/ngo.css?v=9">
+    <link rel="stylesheet" href="/css/dashboards/ngo.css?v=10">
 </head>
 
 <body class="dashboard-page ngo-dashboard">
     <main class="dashboard-shell">
-        <header class="dashboard-header"><a class="brand" href="/"><span
+        <header class="dashboard-header"><div class="ngo-brand"><a class="brand" href="/"><span
                     class="brand-mark">r</span><span>resQmeal</span></a>
+                <nav class="ngo-menu" aria-label="NGO dashboard sections">
+                    <button type="button" data-section-target="ngo-overview">Overview</button>
+                    <button type="button" data-section-target="ngo-deliveries-section">Incoming food</button>
+                    <button type="button" data-section-target="ngo-marketplace">Marketplace</button>
+                    <button type="button" data-section-target="ngo-post-requirement">Post requirement</button>
+                    <button type="button" data-section-target="ngo-requirements">Your requests</button>
+                </nav>
+            </div>
             <div class="dashboard-actions"><button class="outline-button profile-button" id="profile-button"
                     type="button">Profile</button><button class="outline-button" id="logout-button" type="button">Sign
                     out</button>
@@ -30,7 +38,7 @@
                 </div>
             </div>
         </header>
-        <section class="dashboard-hero">
+        <section class="dashboard-hero" id="ngo-overview">
             <div>
                 <p class="eyebrow">Community workspace</p>
                 <h1>NGO dashboard</h1>
@@ -42,12 +50,12 @@
                         id="profile-role">NGO</span></div>
             </div>
         </section>
-        <section class="dashboard-card role-content">
+        <section class="dashboard-card role-content" id="ngo-deliveries-section">
             <p class="eyebrow">Matched deliveries</p>
             <h2>Incoming food</h2>
             <div class="requirements-list" id="ngo-deliveries"></div>
         </section>
-        <section class="dashboard-card marketplace-card">
+        <section class="dashboard-card marketplace-card" id="ngo-marketplace">
             <div class="section-heading">
                 <div>
                     <p class="eyebrow">Marketplace</p>
@@ -57,10 +65,11 @@
             </div>
             <p class="form-intro">Browse food currently awaiting pickup and a simple forecast from recent producer submissions.</p>
             <div class="marketplace-forecast" id="marketplace-forecast">Loading predicted excess...</div>
+            <div class="marketplace-forecast" id="ai-match-recommendations">AI matching recommendations are loading...</div>
             <div class="marketplace-list" id="marketplace-list"></div>
         </section>
         <section class="ngo-grid">
-            <section class="dashboard-card role-content">
+            <section class="dashboard-card role-content" id="ngo-post-requirement">
                 <p class="eyebrow">Posting of required materials</p>
                 <h2>Post a food requirement</h2>
                 <p class="form-intro">Tell local FoodProducers what your community needs.</p>
@@ -89,7 +98,7 @@
                     <p class="form-status" id="requirement-status" role="status"></p>
                 </form>
             </section>
-            <section class="dashboard-card role-content">
+            <section class="dashboard-card role-content" id="ngo-requirements">
                 <div class="section-heading">
                     <div>
                         <p class="eyebrow">Your requests</p>

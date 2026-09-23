@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "start-ai": "python -m uvicorn ai_service.main:app --host 127.0.0.1 --port 8001",
     "setup-db": "node scripts/setup-database.js",
     "build-scss": "node scripts/compile-scss.js",
     "watch-scss": "node scripts/compile-scss.js --watch",

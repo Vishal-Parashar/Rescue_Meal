@@ -65,6 +65,7 @@ function updateOtpInstructions() {
 }
 
 function renderAssignments() {
+  window.resqmealAssignments = assignments;
   document.querySelector("#active-assignment").textContent = `${assignments.length} Batches`;
   const batchSelect = document.querySelector("#active-batch");
   batchSelect.innerHTML = assignments.length
@@ -72,6 +73,7 @@ function renderAssignments() {
     : '<option value="">No active assignments</option>';
   batchSelect.disabled = !assignments.length;
   updateOtpInstructions();
+  window.dispatchEvent(new CustomEvent("resqmeal:assignments", { detail: assignments }));
   if (!assignments.length) {
     assignmentList.innerHTML = '<p class="empty-state">No active assignments. Admin assignments will appear here.</p>';
     return;
@@ -158,7 +160,6 @@ document.querySelector(".btn-verify").addEventListener("click", async () => {
       body: JSON.stringify({ stage: assignment.status === "Picked Up" ? "delivery" : "pickup", otp: code }),
     });
 
-    document.querySelector("#active-batch").addEventListener("change", updateOtpInstructions);
     codeInput.value = "";
     deliveryStatus.style.color = "";
     deliveryStatus.textContent = assignment.status === "Picked Up" ? "Delivery OTP verified. The batch was delivered to the NGO." : "Pickup OTP verified. The batch is now in transit.";
@@ -168,6 +169,8 @@ document.querySelector(".btn-verify").addEventListener("click", async () => {
     deliveryStatus.style.color = "#b34c4c";
   }
 });
+
+document.querySelector("#active-batch").addEventListener("change", updateOtpInstructions);
 
 loadDashboard().catch((error) => {
   deliveryStatus.textContent = error.message;

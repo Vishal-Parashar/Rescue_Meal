@@ -26,6 +26,17 @@ function formatNgoName(ngoName, ngoEmail) {
   return email || "NGO name not set";
 }
 
+document.querySelectorAll("[data-section-target]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const target = document.querySelector(`#${button.dataset.sectionTarget}`);
+    if (!target) return;
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.querySelectorAll("[data-section-target]").forEach((menuButton) => {
+      menuButton.classList.toggle("active", menuButton === button);
+    });
+  });
+});
+
 function normalizeFoodCategory(category) {
   const value = String(category || "").trim().toLowerCase();
   if (["cooked-hot", "cooked-cold", "cooked meal"].includes(value)) return "cooked";
@@ -155,6 +166,7 @@ function renderOperations(data) {
   }
   renderRequests(requirements || []);
   renderEsg(metrics, batches, requirements || []);
+  loadAiForecast(batches, requirements || []);
 
   const table = document.querySelector("#matchingTableBody");
   table.innerHTML = batches.length ? batches.map((batch) => `
@@ -171,6 +183,25 @@ function renderOperations(data) {
         ${(deliveryPartners || []).map((driver) => `<option value="${driver.id}">${escapeHtml(driver.email)}</option>`).join("")}
       </select><button class="btn-assign" data-assign="${batch.id}" ${batch.status !== "Awaiting Pickup" ? "disabled" : ""}>${batch.status === "Awaiting Pickup" ? "Assign" : escapeHtml(batch.status)}</button></td>
     </tr>`).join("") : '<tr><td colspan="5">No producer batches have been submitted.</td></tr>';
+}
+
+async function loadAiForecast(batches, requirements) {
+  const insight = document.querySelector("#ai-forecast-insight");
+  try {
+    const result = await request("/api/admin/ai-forecast", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ batches, requirements }),
+    });
+    if (!result.available) {
+      insight.innerHTML = `<strong>AI forecast:</strong> ${escapeHtml(result.error)}`;
+      return;
+    }
+    const forecast = result.data || {};
+    insight.innerHTML = `<strong>AI forecast (${escapeHtml(forecast.confidence || "Unrated")} confidence):</strong> ${escapeHtml(forecast.outlook || "No outlook available")} - ${escapeHtml(forecast.recommendation || "No recommendation available")}`;
+  } catch (error) {
+    insight.innerHTML = `<strong>AI forecast unavailable:</strong> ${escapeHtml(error.message)}`;
+  }
 }
 
 function renderUsers(users) {
@@ -197,6 +228,7 @@ function renderUsers(users) {
 async function loadDashboard() {
   try {
     const profile = await request("/api/profile");
+    document.querySelector("#profile-name").value = profile.display_name || "";
     document.querySelector("#profile-email").textContent = profile.email;
     document.querySelector("#profile-role").textContent = profile.role;
     document.querySelector("#header-profile-avatar").textContent = profile.email[0].toUpperCase();
@@ -249,6 +281,49 @@ document.querySelector("#logout-button").addEventListener("click", async () => {
 document.querySelector("#profile-button").addEventListener("click", () => {
   const panel = document.querySelector("#header-profile-panel");
   panel.hidden = !panel.hidden;
+});
+
+document.querySelector("#profile-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const status = document.querySelector("#profile-status");
+  try {
+    const result = await request("/api/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ displayName: document.querySelector("#profile-name").value }),
+    });
+    document.querySelector("#profile-name").value = result.profile.display_name;
+    status.textContent = "Name saved.";
+    status.style.color = "";
+  } catch (error) {
+    status.textContent = error.message;
+    status.style.color = "#b34c4c";
+  }
+});
+
+document.querySelector("#admin-create-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const status = document.querySelector("#admin-create-status");
+  const button = form.querySelector("button[type='submit']");
+  button.disabled = true;
+  status.textContent = "Creating admin account...";
+  status.style.color = "";
+  try {
+    await request("/api/admin/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(Object.fromEntries(new FormData(form))),
+    });
+    form.reset();
+    status.textContent = "Admin account created successfully.";
+    await refreshOperations();
+  } catch (error) {
+    status.textContent = error.message;
+    status.style.color = "#b34c4c";
+  } finally {
+    button.disabled = false;
+  }
 });
 
 document.querySelector("#matchingTableBody").addEventListener("click", async (event) => {

@@ -155,7 +155,7 @@ label {
   font-size: 0.78rem;
 }
 
-input[type=email], input[type=password] {
+input[type=email], input[type=password], input[type=text], select {
   width: 100%;
   padding: 0.9rem 1rem;
   border: 1px solid #dce5df;
@@ -167,7 +167,11 @@ input[type=email], input[type=password] {
   transition: border-color 160ms ease, box-shadow 160ms ease;
 }
 
-input:focus {
+select {
+  font: inherit;
+}
+
+input:focus, select:focus {
   border-color: #2f7d61;
   box-shadow: 0 0 0 3px rgba(47, 125, 97, 0.14);
 }
@@ -261,10 +265,42 @@ input:focus {
   }
   .form-panel {
     min-height: 100vh;
-    padding: 1.5rem;
+    padding: 1.25rem;
+    align-items: start;
   }
   .mobile-brand {
     display: inline-flex;
+    margin-bottom: 2.25rem;
+  }
+  .form-card {
+    width: min(100%, 32rem);
+    padding: 0.5rem 0;
+  }
+  .form-intro {
+    margin-bottom: 1.75rem;
+  }
+  .field-heading {
+    gap: 0.75rem;
+  }
+  .field-heading a {
+    white-space: nowrap;
+  }
+}
+@media (min-width: 761px) and (max-width: 1024px) {
+  .auth-shell {
+    grid-template-columns: minmax(260px, 0.8fr) minmax(360px, 1.2fr);
+  }
+  .brand-panel {
+    padding: clamp(1.5rem, 4vw, 3rem);
+  }
+  .brand-message {
+    max-width: 23rem;
+  }
+  h1 {
+    font-size: clamp(2.25rem, 5vw, 3.5rem);
+  }
+  .form-panel {
+    padding: 1.5rem;
   }
 }
 .dashboard-page {
@@ -543,23 +579,37 @@ input:focus {
   padding: 0;
   background: #f7f8f4;
   color: #19352d;
+  overflow-x: hidden;
+}
+.admin-dashboard *,
+.admin-dashboard *::before,
+.admin-dashboard *::after {
+  box-sizing: border-box;
 }
 .admin-dashboard .top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 2rem;
+  gap: 1rem;
   width: min(100% - 3rem, 76rem);
   margin: 0 auto 2rem;
-  padding: 1.5rem 0 3.5rem;
+  padding: 0.8rem 0 1rem;
   border-bottom: 1px solid #dce5df;
-  background: transparent;
+  background: #f7f8f4;
   color: #19352d;
 }
 .admin-dashboard .top-nav {
   position: relative;
 }
 .admin-dashboard .top-nav .brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  min-width: 0;
   color: #19352d;
 }
 .admin-dashboard .top-nav .logo {
@@ -575,6 +625,32 @@ input:focus {
   background: #b9e4ae;
   font-size: 0.68rem;
   font-weight: 800;
+}
+.admin-dashboard .admin-menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.admin-dashboard .admin-menu button {
+  min-height: 2rem;
+  padding: 0.38rem 0.7rem;
+  border: 1px solid #dce5df;
+  border-radius: 0.35rem;
+  color: #205c48;
+  background: #ffffff;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
+}
+.admin-dashboard .admin-menu button:hover,
+.admin-dashboard .admin-menu button:focus-visible,
+.admin-dashboard .admin-menu button.active {
+  border-color: #2f7d61;
+  color: #ffffff;
+  background: #2f7d61;
+  outline: 0;
 }
 .admin-dashboard .user-meta {
   display: flex;
@@ -618,6 +694,15 @@ input:focus {
   width: min(100% - 3rem, 76rem);
   margin: 0 auto;
   padding-bottom: 3rem;
+  min-width: 0;
+}
+.admin-dashboard #admin-overview,
+.admin-dashboard #redistribution-management,
+.admin-dashboard #waste-analytics,
+.admin-dashboard #redistribution-requests,
+.admin-dashboard #esg-score,
+.admin-dashboard #user-management {
+  scroll-margin-top: 6rem;
 }
 .admin-dashboard .admin-intro {
   display: flex;
@@ -660,6 +745,7 @@ input:focus {
   margin-bottom: 1.25rem;
 }
 .admin-dashboard .metric-card {
+  min-width: 0;
   padding: 1.4rem;
   border: 0;
   border-left: 4px solid transparent;
@@ -700,6 +786,7 @@ input:focus {
   gap: 1.25rem;
 }
 .admin-dashboard .panel {
+  min-width: 0;
   padding: 1.5rem;
   border: 1px solid #dce5df;
   border-radius: 1rem;
@@ -944,6 +1031,26 @@ input:focus {
 .admin-dashboard .user-management .panel-title {
   margin-bottom: 0;
 }
+.admin-dashboard .admin-create-form {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+.admin-dashboard .admin-create-form label {
+  display: grid;
+  gap: 0.4rem;
+  color: #70827b;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.admin-dashboard .admin-create-form input {
+  width: 100%;
+}
+.admin-dashboard .admin-create-form .form-status {
+  grid-column: 1/-1;
+  margin: 0;
+}
 .admin-dashboard .user-count {
   color: #70827b;
   font-size: 0.8rem;
@@ -963,6 +1070,14 @@ input:focus {
   .admin-dashboard .data-table {
     min-width: 42rem;
   }
+  .admin-dashboard #admin-overview,
+  .admin-dashboard #redistribution-management,
+  .admin-dashboard #waste-analytics,
+  .admin-dashboard #redistribution-requests,
+  .admin-dashboard #esg-score,
+  .admin-dashboard #user-management {
+    scroll-margin-top: 8rem;
+  }
 }
 @media (max-width: 760px) {
   .admin-dashboard .admin-intro {
@@ -976,7 +1091,24 @@ input:focus {
     width: min(100% - 2rem, 76rem);
     align-items: flex-start;
     flex-direction: column;
-    padding-bottom: 2rem;
+    padding-bottom: 1rem;
+  }
+  .admin-dashboard .top-nav .brand,
+  .admin-dashboard .admin-menu,
+  .admin-dashboard .user-meta,
+  .admin-dashboard .dashboard-container,
+  .admin-dashboard .admin-intro,
+  .admin-dashboard .panel,
+  .admin-dashboard .metric-card {
+    width: 100%;
+    max-width: 100%;
+  }
+  .admin-dashboard .admin-menu {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .admin-dashboard .admin-menu button {
+    text-align: center;
   }
   .admin-dashboard .admin-intro h1 {
     font-size: 2rem;
@@ -992,8 +1124,16 @@ input:focus {
     padding: 1rem;
   }
   .admin-dashboard .user-meta {
-    width: 100%;
-    justify-content: flex-end;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+  .admin-dashboard .user-meta .outline-button {
+    flex: 1 1 7rem;
+  }
+  .admin-dashboard .header-profile-panel {
+    right: 0;
+    width: min(100vw - 2rem, 20rem);
+    min-width: 0;
   }
   .admin-dashboard .dashboard-container {
     width: min(100% - 2rem, 76rem);
@@ -1008,8 +1148,50 @@ input:focus {
   .admin-dashboard .user-management {
     padding: 1rem;
   }
+  .admin-dashboard .admin-create-form {
+    grid-template-columns: 1fr;
+  }
+  .admin-dashboard .admin-create-form .form-status {
+    grid-column: auto;
+  }
   .admin-dashboard .batch-details-grid {
     grid-template-columns: 1fr;
+  }
+  .admin-dashboard .panel-title {
+    font-size: 1.2rem;
+  }
+  .admin-dashboard .metric-card,
+  .admin-dashboard .panel,
+  .admin-dashboard .user-management {
+    padding: 1rem;
+  }
+}
+@media (max-width: 480px) {
+  .admin-dashboard .top-nav,
+  .admin-dashboard .dashboard-container {
+    width: calc(100% - 1.25rem);
+  }
+  .admin-dashboard .admin-intro h1 {
+    font-size: 1.8rem;
+  }
+  .admin-dashboard .admin-menu {
+    gap: 0.3rem;
+  }
+  .admin-dashboard .admin-menu button {
+    padding-inline: 0.4rem;
+    font-size: 0.68rem;
+  }
+  .admin-dashboard .metric-progress-row {
+    gap: 0.5rem;
+  }
+  .admin-dashboard .row-value {
+    width: auto;
+  }
+  .admin-dashboard .batch-modal {
+    padding: 0.75rem;
+  }
+  .admin-dashboard .batch-modal-card {
+    padding: 1rem;
   }
 }
 

@@ -6,7 +6,7 @@
     <title>ResQmeal - Food Producer</title>
 
     <link rel="stylesheet" href="/css/styles.css?v=7">
-    <link rel="stylesheet" href="/css/dashboards/food-producer.css?v=8">
+    <link rel="stylesheet" href="/css/dashboards/food-producer.css?v=9">
 </head>
 
 <body class="food-producer-dashboard">
@@ -19,6 +19,13 @@
 
             <div class="brand">
                 <span class="brand-name">ResQmeal</span>
+                <nav class="producer-menu" aria-label="Food producer sections">
+                    <button type="button" data-section-target="producer-overview">Overview</button>
+                    <button type="button" data-section-target="producer-tools">Storage & tools</button>
+                    <button type="button" data-section-target="producer-stock">Current stock</button>
+                    <button type="button" data-section-target="producer-surplus">Surplus food</button>
+                    <button type="button" data-section-target="producer-batches">Active batches</button>
+                </nav>
             </div>
 
             <div class="user-section">
@@ -41,7 +48,7 @@
 
         <!-- ================= SUMMARY CARDS ================= -->
 
-        <section class="summary-grid">
+        <section class="summary-grid" id="producer-overview">
 
             <!-- Today's Batches -->
 
@@ -101,7 +108,7 @@
 
         </section>
 
-        <section class="producer-tools-grid">
+        <section class="producer-tools-grid" id="producer-tools">
             <article class="panel producer-tool">
                 <p class="eyebrow">Smart storage</p>
                 <h2>Storage conditions using IoT</h2>
@@ -118,64 +125,124 @@
                 <h2>Raw materials details</h2>
                 <p class="tool-intro">Capture a label or material image to prepare traceability details before adding stock.</p>
                 <label class="upload-dropzone" for="material-image"><strong>Upload material image</strong><span>Use a clear label or product photo</span><input id="material-image" type="file" accept="image/*"></label>
-                <label class="capture-photo-button" for="material-camera">
-                    Capture image
-                    <input id="material-camera" type="file" accept="image/*" capture="environment">
-                </label>
+                <button class="capture-photo-button" id="open-camera" type="button">Capture image</button>
+                <input id="material-camera" type="file" accept="image/*" capture="environment" hidden>
                 <div class="cv-result" id="cv-result">No material image selected.</div>
             </article>
         </section>
 
-        <section class="panel inventory-panel">
+        <div class="camera-modal" id="camera-modal" hidden>
+            <div class="camera-dialog" role="dialog" aria-modal="true" aria-labelledby="camera-title">
+                <div class="camera-dialog-heading">
+                    <h2 id="camera-title">Capture material image</h2>
+                    <button class="camera-close-button" id="close-camera" type="button" aria-label="Close camera">&times;</button>
+                </div>
+                <video id="material-video" autoplay playsinline></video>
+                <canvas id="material-canvas" hidden></canvas>
+                <p class="camera-status" id="camera-status" role="status" aria-live="polite">Allow camera access to take a photo.</p>
+                <div class="camera-actions">
+                    <button class="outline-button" id="take-photo" type="button">Take photo</button>
+                    <button class="outline-button" id="use-camera-upload" type="button">Use device upload</button>
+                </div>
+            </div>
+        </div>
+
+        <section class="panel inventory-panel" id="producer-stock">
             <div class="inventory-heading">
                 <div>
                     <p class="eyebrow">Stock control</p>
-                    <h2>Food inventory</h2>
+                    <h2>Current stock</h2>
+                    <p class="inventory-intro">Track what is in stock, check expiry dates, and add new deliveries before requesting a surplus pickup.</p>
                 </div>
                 <p class="form-status" id="inventory-status" role="status" aria-live="polite"></p>
             </div>
-            <form id="inventory-form" class="inventory-form">
-                <input id="inventory-item" placeholder="Item name" required>
-                <select id="inventory-category" required>
-                    <option value="">Category</option>
-                    <option>Raw material</option>
-                    <option>Cooked food</option>
-                    <option>Packaged food</option>
-                    <option>Bakery</option>
-                </select>
-                <input id="inventory-quantity" type="number" min="0.01" step="0.01" placeholder="Quantity" required>
-                <select id="inventory-unit" required>
-                    <option value="">Unit</option>
-                    <option>kg</option>
-                    <option>litres</option>
-                    <option>servings</option>
-                    <option>packets</option>
-                </select>
-                <label class="inventory-field">
-                    <span>Expiry date</span>
-                    <input id="inventory-expiry" type="date" required>
+            <div class="inventory-insights" aria-label="Inventory summary">
+                <div class="inventory-insight"><span>Total items</span><strong id="inventory-total">0</strong><small>currently tracked</small></div>
+                <div class="inventory-insight"><span>Low stock</span><strong id="inventory-low">0</strong><small>review quantities</small></div>
+                <div class="inventory-insight"><span>Expiring soon</span><strong id="inventory-expiring">0</strong><small>within 3 days</small></div>
+            </div>
+            <div class="inventory-toolbar">
+                <label class="inventory-search">
+                    <span class="sr-only">Search stock</span>
+                    <input id="inventory-search" type="search" placeholder="Search by item or category">
                 </label>
-                <input id="inventory-barcode" placeholder="Barcode (optional)" inputmode="numeric">
-                <button class="scan-barcode-button" id="scan-barcode" type="button">Scan barcode</button>
-                <button class="upload-btn" type="submit">Add stock</button>
-            </form>
-            <div class="barcode-scanner" id="barcode-scanner" hidden>
-                <video id="barcode-video" playsinline></video>
-                <p class="form-status" id="barcode-status" role="status" aria-live="polite">Point the camera at a barcode.</p>
-                <button class="outline-button" id="stop-barcode" type="button">Stop scanning</button>
+                <div class="inventory-filters" role="group" aria-label="Filter stock">
+                    <button class="inventory-filter active" type="button" data-inventory-filter="all">All items</button>
+                    <button class="inventory-filter" type="button" data-inventory-filter="low">Low stock</button>
+                    <button class="inventory-filter" type="button" data-inventory-filter="expiring">Expiring soon</button>
+                </div>
             </div>
             <div class="table-wrapper">
                 <table>
-                    <thead><tr><th>Item</th><th>Category</th><th>Barcode</th><th>Quantity</th><th>Expiry</th><th>Action</th></tr></thead>
+                    <thead><tr><th>Item</th><th>Category</th><th>Quantity</th><th>Expiry</th><th>Status</th><th>Action</th></tr></thead>
                     <tbody id="inventory-table"><tr><td colspan="6">Loading inventory...</td></tr></tbody>
                 </table>
+            </div>
+            <div class="add-stock-card">
+                <div class="add-stock-heading">
+                    <div>
+                        <p class="eyebrow">Stock intake</p>
+                        <h3>Add stock</h3>
+                    </div>
+                    <p>Enter details manually or scan a packaged item's barcode.</p>
+                </div>
+                <form id="inventory-form" class="inventory-form">
+                    <label class="inventory-input-field">
+                        <span>Item name <em>(required)</em></span>
+                        <input id="inventory-item" placeholder="e.g. Full-cream milk" required>
+                    </label>
+                    <label class="inventory-input-field">
+                        <span>Category <em>(required)</em></span>
+                        <select id="inventory-category" required>
+                            <option value="">Choose a category</option>
+                            <option>Raw material</option>
+                            <option>Cooked food</option>
+                            <option>Packaged food</option>
+                            <option>Bakery</option>
+                        </select>
+                    </label>
+                    <div class="inventory-quantity-group">
+                        <label class="inventory-input-field">
+                            <span>Quantity <em>(required)</em></span>
+                            <input id="inventory-quantity" type="number" min="0.01" step="0.01" placeholder="0" required>
+                        </label>
+                        <label class="inventory-input-field">
+                            <span>Unit</span>
+                            <select id="inventory-unit" required>
+                                <option value="">Choose</option>
+                                <option>kg</option>
+                                <option>litres</option>
+                                <option>servings</option>
+                                <option>packets</option>
+                            </select>
+                        </label>
+                    </div>
+                    <label class="inventory-field">
+                        <span>Expiry date <em>(required)</em></span>
+                        <input id="inventory-expiry" type="date" required>
+                    </label>
+                    <label class="inventory-input-field">
+                        <span>Barcode <em>(optional)</em></span>
+                        <input id="inventory-barcode" placeholder="Type barcode number" inputmode="numeric">
+                    </label>
+                    <div class="inventory-barcode-actions">
+                        <button class="scan-barcode-button" id="scan-barcode" type="button">Scan barcode</button>
+                        <small>For packaged items. You can also enter it manually.</small>
+                    </div>
+                    <button class="upload-btn" type="submit">Add to stock</button>
+                </form>
+                <div class="barcode-scanner" id="barcode-scanner" hidden>
+                    <video id="barcode-video" playsinline></video>
+                    <p class="form-status" id="barcode-status" role="status" aria-live="polite">Point the camera at a barcode.</p>
+                    <button class="outline-button" id="stop-barcode" type="button">Stop scanning</button>
+                </div>
             </div>
         </section>
 
 
         <!-- ================= MAIN CONTENT ================= -->
 
-        <section class="main-grid">
+        <section class="main-grid" id="producer-surplus">
 
 
             <!-- ================= UPLOAD PANEL ================= -->
@@ -302,7 +369,7 @@
 
             <!-- ================= ACTIVE BATCHES ================= -->
 
-            <div class="panel batches-panel">
+            <div class="panel batches-panel" id="producer-batches">
 
                 <h2>
                     Active Batches &amp; Release Confirmation

@@ -11,6 +11,79 @@ const barcodeStatus = document.querySelector("#barcode-status");
 let barcodeStream = null;
 let barcodeDetector = null;
 let barcodeFrame = null;
+let inventoryFilter = "all";
+let inventorySearch = "";
+
+document.querySelectorAll("[data-section-target]").forEach((button) => {
+    button.addEventListener("click", () => {
+        const target = document.querySelector(`#${button.dataset.sectionTarget}`);
+        if (!target) return;
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+        document.querySelectorAll("[data-section-target]").forEach((menuButton) => {
+            menuButton.classList.toggle("active", menuButton === button);
+        });
+    });
+});
+
+function stopBarcodeScanner() {
+    if (barcodeFrame) cancelAnimationFrame(barcodeFrame);
+    barcodeFrame = null;
+    if (barcodeStream) barcodeStream.getTracks().forEach((track) => track.stop());
+    barcodeStream = null;
+    barcodeVideo.srcObject = null;
+    barcodeScanner.hidden = true;
+}
+
+async function scanBarcode() {
+    if (!navigator.mediaDevices?.getUserMedia) {
+        barcodeStatus.textContent = "Camera access is not supported here. Enter the barcode manually.";
+        barcodeStatus.style.color = "#b34c4c";
+        return;
+    }
+
+    try {
+        barcodeStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { ideal: "environment" } },
+            audio: false,
+        });
+        barcodeVideo.srcObject = barcodeStream;
+        barcodeScanner.hidden = false;
+        barcodeStatus.textContent = "Point the camera at a barcode, or enter it manually below.";
+        barcodeStatus.style.color = "";
+        await barcodeVideo.play();
+
+        if (!("BarcodeDetector" in window)) {
+            barcodeStatus.textContent = "Camera opened. Automatic barcode detection is unavailable in this browser.";
+            return;
+        }
+
+        barcodeDetector = new BarcodeDetector();
+        const detect = async () => {
+            if (!barcodeStream) return;
+            const results = await barcodeDetector.detect(barcodeVideo);
+            if (results[0]?.rawValue) {
+                barcodeInput.value = results[0].rawValue;
+                barcodeStatus.textContent = `Scanned: ${results[0].rawValue}`;
+                stopBarcodeScanner();
+                return;
+            }
+            barcodeFrame = requestAnimationFrame(detect);
+        };
+        detect().catch(() => {
+            barcodeStatus.textContent = "Camera is open, but this barcode could not be read. Enter it manually.";
+            barcodeStatus.style.color = "#b34c4c";
+        });
+    } catch (error) {
+        stopBarcodeScanner();
+        barcodeStatus.textContent = error.name === "NotAllowedError"
+            ? "Camera permission was denied. Enter the barcode manually."
+            : "Unable to start the camera. Enter the barcode manually.";
+        barcodeStatus.style.color = "#b34c4c";
+    }
+}
+
+document.querySelector("#scan-barcode").addEventListener("click", scanBarcode);
+document.querySelector("#stop-barcode").addEventListener("click", stopBarcodeScanner);
 
 const today = new Date().toISOString().slice(0, 10);
 document.querySelector("#inventory-expiry").min = today;
@@ -45,6 +118,22 @@ function formatInventoryDate(value) {
     return Number.isNaN(date.getTime()) ? "Date unavailable" : date.toLocaleDateString();
 }
 
+function inventoryFlags(item) {
+    const quantity = Number(item.quantity);
+    const expiry = new Date(`${String(item.expires_on || "").slice(0, 10)}T00:00:00`);
+    const daysUntilExpiry = Math.ceil((expiry - new Date(`${today}T00:00:00`)) / 86400000);
+    return {
+        low: Number.isFinite(quantity) && quantity <= 5,
+        expiring: Number.isFinite(daysUntilExpiry) && daysUntilExpiry <= 3,
+    };
+}
+
+function updateInventoryInsights(items) {
+    document.querySelector("#inventory-total").textContent = items.length;
+    document.querySelector("#inventory-low").textContent = items.filter((item) => inventoryFlags(item).low).length;
+    document.querySelector("#inventory-expiring").textContent = items.filter((item) => inventoryFlags(item).expiring).length;
+}
+
 function requestPickup(item) {
     document.querySelector("#foodDescription").value = item.item_name;
     document.querySelector("#foodCategory").value = item.category.toLowerCase().includes("raw") ? "raw" : "packaged";
@@ -77,12 +166,22 @@ function renderBatches(batches) {
 
 function renderInventory(items) {
     window.producerInventory = items;
-    if (!items.length) {
-            inventoryTable.innerHTML = '<tr><td colspan="6">No inventory items added yet.</td></tr>';
+    updateInventoryInsights(items);
+    const visibleItems = items.filter((item) => {
+        const matchesSearch = !inventorySearch
+            || `${item.item_name} ${item.category}`.toLowerCase().includes(inventorySearch);
+        const flags = inventoryFlags(item);
+        const matchesFilter = inventoryFilter === "all"
+            || (inventoryFilter === "low" && flags.low)
+            || (inventoryFilter === "expiring" && flags.expiring);
+        return matchesSearch && matchesFilter;
+    });
+    if (!visibleItems.length) {
+            inventoryTable.innerHTML = `<tr><td colspan="6">${items.length ? "No stock matches this filter." : "No inventory items added yet."}</td></tr>`;
             return;
     }
 
-    const batches = items.reduce((groups, item) => {
+    const batches = visibleItems.reduce((groups, item) => {
             const date = String(item.expires_on || "").slice(0, 10);
             if (!groups[date]) groups[date] = [];
             groups[date].push(item);
@@ -97,9 +196,9 @@ function renderInventory(items) {
                 <tr>
                     <td><strong>${escapeHtml(item.item_name)}</strong></td>
                     <td>${escapeHtml(item.category)}</td>
-                    <td>${escapeHtml(item.barcode || "—")}</td>
                     <td>${escapeHtml(item.quantity)} ${escapeHtml(item.unit)}</td>
                     <td>${formatInventoryDate(item.expires_on)}</td>
+                    <td>${inventoryFlags(item).expiring ? '<span class="inventory-status status-orange">Expiring soon</span>' : inventoryFlags(item).low ? '<span class="inventory-status status-orange">Low stock</span>' : '<span class="inventory-status status-green">In stock</span>'}</td>
                     <td><button type="button" class="pickup-button" data-pickup-item="${item.id}">Request pickup</button> <button type="button" class="delete-batch-button delete-inventory" data-inventory-id="${item.id}">Delete</button></td>
                 </tr>`).join("")}
     `).join("");
@@ -197,7 +296,7 @@ surplusForm.addEventListener("submit", async (event) => {
 
 inventoryForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const button = inventoryForm.querySelector("button");
+    const button = inventoryForm.querySelector('button[type="submit"]');
     button.disabled = true;
     inventoryStatus.textContent = "Adding stock...";
     inventoryStatus.style.color = "";
@@ -215,55 +314,6 @@ inventoryForm.addEventListener("submit", async (event) => {
             }),
         });
 
-        function stopBarcodeScanner() {
-            if (barcodeFrame) cancelAnimationFrame(barcodeFrame);
-            barcodeFrame = null;
-            if (barcodeStream) barcodeStream.getTracks().forEach((track) => track.stop());
-            barcodeStream = null;
-            barcodeVideo.srcObject = null;
-            barcodeScanner.hidden = true;
-        }
-
-        async function scanBarcode() {
-            if (!("BarcodeDetector" in window)) {
-                barcodeStatus.textContent = "Camera scanning is not supported here. Enter the barcode manually.";
-                barcodeStatus.style.color = "#b34c4c";
-                return;
-            }
-            try {
-                barcodeDetector = new BarcodeDetector();
-                barcodeStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-                barcodeVideo.srcObject = barcodeStream;
-                barcodeScanner.hidden = false;
-                barcodeStatus.textContent = "Point the camera at a barcode.";
-                barcodeStatus.style.color = "";
-                await barcodeVideo.play();
-                const detect = async () => {
-                    if (!barcodeStream) return;
-                    const results = await barcodeDetector.detect(barcodeVideo);
-                    if (results[0]?.rawValue) {
-                        barcodeInput.value = results[0].rawValue;
-                        barcodeStatus.textContent = `Scanned: ${results[0].rawValue}`;
-                        stopBarcodeScanner();
-                        return;
-                    }
-                    barcodeFrame = requestAnimationFrame(detect);
-                };
-                detect().catch(() => {
-                    barcodeStatus.textContent = "Unable to read this barcode. Enter it manually.";
-                    barcodeStatus.style.color = "#b34c4c";
-                });
-            } catch (error) {
-                stopBarcodeScanner();
-                barcodeStatus.textContent = error.name === "NotAllowedError"
-                    ? "Camera permission was denied. Enter the barcode manually."
-                    : "Unable to start the camera. Enter the barcode manually.";
-                barcodeStatus.style.color = "#b34c4c";
-            }
-        }
-
-        document.querySelector("#scan-barcode").addEventListener("click", scanBarcode);
-        document.querySelector("#stop-barcode").addEventListener("click", stopBarcodeScanner);
         inventoryForm.reset();
         inventoryStatus.textContent = "Stock added.";
         await loadDashboard();
@@ -304,6 +354,101 @@ function updateMaterialImage(event) {
 
 document.querySelector("#material-image").addEventListener("change", updateMaterialImage);
 document.querySelector("#material-camera").addEventListener("change", updateMaterialImage);
+
+document.querySelector("#inventory-search").addEventListener("input", (event) => {
+    inventorySearch = event.target.value.trim().toLowerCase();
+    renderInventory(window.producerInventory || []);
+});
+
+document.querySelectorAll("[data-inventory-filter]").forEach((button) => {
+    button.addEventListener("click", () => {
+        inventoryFilter = button.dataset.inventoryFilter;
+        document.querySelectorAll("[data-inventory-filter]").forEach((filterButton) => {
+            filterButton.classList.toggle("active", filterButton === button);
+        });
+        renderInventory(window.producerInventory || []);
+    });
+});
+
+const cameraModal = document.querySelector("#camera-modal");
+const materialVideo = document.querySelector("#material-video");
+const materialCanvas = document.querySelector("#material-canvas");
+const cameraStatus = document.querySelector("#camera-status");
+let materialCameraStream = null;
+
+function stopMaterialCamera() {
+    if (materialCameraStream) {
+        materialCameraStream.getTracks().forEach((track) => track.stop());
+        materialCameraStream = null;
+    }
+    materialVideo.srcObject = null;
+    cameraModal.hidden = true;
+}
+
+async function openMaterialCamera() {
+    if (!navigator.mediaDevices?.getUserMedia) {
+        cameraStatus.textContent = "Live camera is not supported here. Use device upload instead.";
+        cameraStatus.style.color = "#b34c4c";
+        cameraModal.hidden = false;
+        return;
+    }
+
+    cameraModal.hidden = false;
+    cameraStatus.textContent = "Requesting camera access...";
+    cameraStatus.style.color = "";
+    try {
+        materialCameraStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { ideal: "environment" } },
+            audio: false,
+        });
+        materialVideo.srcObject = materialCameraStream;
+        await materialVideo.play();
+        cameraStatus.textContent = "Position the material in the frame, then take the photo.";
+    } catch (error) {
+        stopMaterialCamera();
+        cameraModal.hidden = false;
+        cameraStatus.textContent = error.name === "NotAllowedError"
+            ? "Camera permission was denied. Use device upload instead."
+            : "Unable to start the camera. Use device upload instead.";
+        cameraStatus.style.color = "#b34c4c";
+    }
+}
+
+function captureMaterialPhoto() {
+    if (!materialCameraStream || !materialVideo.videoWidth) {
+        cameraStatus.textContent = "Camera is not ready yet.";
+        cameraStatus.style.color = "#b34c4c";
+        return;
+    }
+
+    materialCanvas.width = materialVideo.videoWidth;
+    materialCanvas.height = materialVideo.videoHeight;
+    materialCanvas.getContext("2d").drawImage(materialVideo, 0, 0);
+    materialCanvas.toBlob((blob) => {
+        if (!blob) {
+            cameraStatus.textContent = "Unable to capture the photo. Please try again.";
+            cameraStatus.style.color = "#b34c4c";
+            return;
+        }
+        const file = new File([blob], `material-${Date.now()}.jpg`, { type: "image/jpeg" });
+        const transfer = new DataTransfer();
+        transfer.items.add(file);
+        document.querySelector("#material-image").files = transfer.files;
+        updateMaterialImage({ target: { files: [file] } });
+        stopMaterialCamera();
+    }, "image/jpeg", 0.9);
+}
+
+document.querySelector("#open-camera").addEventListener("click", openMaterialCamera);
+document.querySelector("#take-photo").addEventListener("click", captureMaterialPhoto);
+document.querySelector("#close-camera").addEventListener("click", stopMaterialCamera);
+document.querySelector("#use-camera-upload").addEventListener("click", () => {
+    stopMaterialCamera();
+    document.querySelector("#material-camera").click();
+});
+cameraModal.addEventListener("click", (event) => {
+    if (event.target === cameraModal) stopMaterialCamera();
+});
 
 batchesTable.addEventListener("click", async (event) => {
     const button = event.target.closest(".delete-batch-button");

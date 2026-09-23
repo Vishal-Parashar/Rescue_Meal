@@ -237,8 +237,9 @@
 
   .map-placeholder {
     display: grid;
-    min-height: 10rem;
-    place-content: center;
+    min-height: 18rem;
+    overflow: hidden;
+    place-content: stretch;
     gap: .35rem;
     border: 1px dashed $line;
     border-radius: .8rem;
@@ -255,6 +256,22 @@
 
   .map-placeholder small {
     font-size: .72rem;
+  }
+
+  .resqmeal-map-marker {
+    display: grid;
+    place-items: center;
+    border: 0;
+    background: transparent;
+  }
+
+  .resqmeal-map-marker span {
+    display: block;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 3px solid $white;
+    border-radius: 50%;
+    box-shadow: 0 .15rem .5rem rgba(25, 53, 45, .35);
   }
 
   .terminal-box {

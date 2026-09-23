@@ -155,7 +155,7 @@ label {
   font-size: 0.78rem;
 }
 
-input[type=email], input[type=password] {
+input[type=email], input[type=password], input[type=text], select {
   width: 100%;
   padding: 0.9rem 1rem;
   border: 1px solid #dce5df;
@@ -167,7 +167,11 @@ input[type=email], input[type=password] {
   transition: border-color 160ms ease, box-shadow 160ms ease;
 }
 
-input:focus {
+select {
+  font: inherit;
+}
+
+input:focus, select:focus {
   border-color: #2f7d61;
   box-shadow: 0 0 0 3px rgba(47, 125, 97, 0.14);
 }
@@ -261,10 +265,42 @@ input:focus {
   }
   .form-panel {
     min-height: 100vh;
-    padding: 1.5rem;
+    padding: 1.25rem;
+    align-items: start;
   }
   .mobile-brand {
     display: inline-flex;
+    margin-bottom: 2.25rem;
+  }
+  .form-card {
+    width: min(100%, 32rem);
+    padding: 0.5rem 0;
+  }
+  .form-intro {
+    margin-bottom: 1.75rem;
+  }
+  .field-heading {
+    gap: 0.75rem;
+  }
+  .field-heading a {
+    white-space: nowrap;
+  }
+}
+@media (min-width: 761px) and (max-width: 1024px) {
+  .auth-shell {
+    grid-template-columns: minmax(260px, 0.8fr) minmax(360px, 1.2fr);
+  }
+  .brand-panel {
+    padding: clamp(1.5rem, 4vw, 3rem);
+  }
+  .brand-message {
+    max-width: 23rem;
+  }
+  h1 {
+    font-size: clamp(2.25rem, 5vw, 3.5rem);
+  }
+  .form-panel {
+    padding: 1.5rem;
   }
 }
 .dashboard-page {

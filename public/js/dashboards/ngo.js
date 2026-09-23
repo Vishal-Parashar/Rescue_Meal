@@ -6,6 +6,17 @@ const isLocalhost = ["localhost", "127.0.0.1"].includes(window.location.hostname
 const isExpressDashboard = isLocalhost && window.location.port === "3000";
 const apiOrigin = isExpressDashboard ? "" : "http://localhost:3000";
 
+document.querySelectorAll("[data-section-target]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const target = document.querySelector(`#${button.dataset.sectionTarget}`);
+    if (!target) return;
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.querySelectorAll("[data-section-target]").forEach((menuButton) => {
+      menuButton.classList.toggle("active", menuButton === button);
+    });
+  });
+});
+
 if (isLocalhost && !isExpressDashboard) {
   window.location.replace(`http://localhost:3000/dashboard/ngo`);
   throw new Error("Redirecting NGO dashboard to the Express server.");
@@ -85,6 +96,20 @@ function renderMarketplace(listings, predictedExcessServings) {
   `).join("") : '<p class="empty-state">No excess food is available right now.</p>';
 }
 
+function renderAiRecommendations(result) {
+  const target = document.querySelector("#ai-match-recommendations");
+  if (!result.available) {
+    target.innerHTML = `<strong>AI matching:</strong> ${escapeHtml(result.error)}`;
+    return;
+  }
+  const data = result.data || {};
+  const matches = Array.isArray(data.matches) ? data.matches : [];
+  const details = matches.length
+    ? ` ${matches.map((match) => `${escapeHtml(match.priority || "Suggested")} priority batch #${escapeHtml(match.batchId)}: ${escapeHtml(match.reason)}`).join(" · ")}`
+    : "";
+  target.innerHTML = `<strong>AI matching:</strong> ${escapeHtml(data.summary || "No matching recommendation is available.")}${details}`;
+}
+
 async function loadDashboard() {
   const result = await request("/api/ngo/requirements");
   document.querySelector("#profile-name").value = result.profile.display_name || "";
@@ -102,6 +127,12 @@ async function loadDashboard() {
 async function loadMarketplace() {
   const result = await request("/api/ngo/marketplace");
   renderMarketplace(result.listings, result.predictedExcessServings);
+  try {
+    const recommendations = await request("/api/ngo/marketplace/recommendations");
+    renderAiRecommendations(recommendations);
+  } catch (error) {
+    renderAiRecommendations({ available: false, error: error.message });
+  }
 }
 
 logoutButton.addEventListener("click", async () => {

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ResQmeal - Central Redistribution Ops</title>
   <link rel="stylesheet" href="/css/styles.css?v=7">
-  <link rel="stylesheet" href="/css/dashboards/admin.css?v=9">
+  <link rel="stylesheet" href="/css/dashboards/admin.css?v=10">
 </head>
 <body class="admin-dashboard">
 
@@ -13,25 +13,42 @@
   <header class="top-nav">
     <div class="brand">
       <span class="logo">ResQmeal</span>
+      <nav class="admin-menu" aria-label="Admin dashboard sections">
+        <button type="button" data-section-target="admin-overview">Overview</button>
+        <button type="button" data-section-target="redistribution-management">Redistribution</button>
+        <button type="button" data-section-target="waste-analytics">Analytics</button>
+        <button type="button" data-section-target="redistribution-requests">Requests</button>
+        <button type="button" data-section-target="esg-score">ESG score</button>
+        <button type="button" data-section-target="user-management">Users</button>
+      </nav>
     </div>
     <div class="user-meta">
       <button class="profile-button outline-button" id="profile-button" type="button">Profile</button>
       <button class="btn-logout outline-button" id="logout-button" type="button">Sign out</button>
       <div class="header-profile-panel" id="header-profile-panel" hidden>
         <div class="avatar" id="header-profile-avatar">A</div>
-        <div><span class="profile-label">Signed in as</span><strong id="profile-email">Loading...</strong><span id="profile-role">Admin</span></div>
+        <div>
+          <span class="profile-label">Signed in as</span>
+          <strong id="profile-email">Loading...</strong>
+          <span id="profile-role">Admin</span>
+          <form id="profile-form" class="profile-edit-form">
+            <label for="profile-name">Admin name</label>
+            <input id="profile-name" name="displayName" maxlength="120" required>
+            <button type="submit" class="outline-button">Save name</button>
+            <span id="profile-status" class="form-status" role="status"></span>
+          </form>
+        </div>
       </div>
     </div>
   </header>
 
   <main class="dashboard-container">
-    <section class="admin-intro">
+    <section class="admin-intro" id="admin-overview">
       <div>
         <p class="eyebrow">ADMIN</p>
         <h1>Central redistribution operations</h1>
         <p>Monitor waste, coordinate redistribution, and track the impact of every rescued meal.</p>
       </div>
-      </nav>
     </section>
 
     <!-- Metric Stat Cards -->
@@ -125,6 +142,9 @@
         <div class="analytics-insight" id="analytics-insight">
           Loading the latest predictive insight...
         </div>
+        <div class="analytics-insight" id="ai-forecast-insight">
+          AI forecast is loading...
+        </div>
       </article>
     </section>
 
@@ -163,7 +183,7 @@
       </article>
     </section>
 
-    <section class="user-management panel">
+    <section class="user-management panel" id="user-management">
       <div class="section-heading">
         <div>
           <p class="eyebrow">Access control</p>
@@ -188,6 +208,23 @@
           </tbody>
         </table>
       </div>
+    </section>
+
+    <section class="user-management panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Admin-only account creation</p>
+          <h2 class="panel-title">Create an admin account</h2>
+        </div>
+      </div>
+      <p class="panel-intro">Admin accounts cannot be created from public registration. Use this form while signed in as an administrator.</p>
+      <form class="admin-create-form" id="admin-create-form">
+        <label>Email<input type="email" name="email" required autocomplete="email"></label>
+        <label>Name<input type="text" name="displayName" maxlength="120" autocomplete="name"></label>
+        <label>Password<input type="password" name="password" minlength="6" required autocomplete="new-password"></label>
+        <button class="outline-button" type="submit">Create admin</button>
+        <p class="form-status" id="admin-create-status" role="status" aria-live="polite"></p>
+      </form>
     </section>
   </main>
 

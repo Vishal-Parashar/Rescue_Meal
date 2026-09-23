@@ -1,36 +1,108 @@
 .food-producer-dashboard {
     min-height: 100vh;
     padding: 0;
+    overflow-x: hidden;
     background: $cream;
     color: $ink;
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
 
     .dashboard {
         width: min(100% - 3rem, 76rem);
         margin: 0 auto;
+        min-width: 0;
         padding-bottom: 3rem;
+        display: flex;
+        flex-direction: column;
     }
 
-    .food-producer-dashboard .user-section { order: initial; margin-left: auto; position: relative; }
-    .food-producer-dashboard .header-profile-panel { position: absolute; top: calc(100% + .6rem); left: auto; right: 0; z-index: 5; display: flex; align-items: center; gap: .75rem; min-width: 15rem; padding: 1rem; border: 1px solid $line; border-radius: .8rem; background: $white; box-shadow: 0 1rem 3rem rgba(25,53,45,.12); }
-    .food-producer-dashboard .header-profile-panel[hidden] { display: none; }
+    .user-section { order: initial; margin-left: auto; position: relative; }
+    .header-profile-panel {
+        position: absolute;
+        top: calc(100% + .6rem);
+        right: 0;
+        left: auto;
+        z-index: 5;
+        display: flex;
+        align-items: stretch;
+        gap: .75rem;
+        width: min(20rem, calc(100vw - 2rem));
+        min-width: 15rem;
+        padding: 1rem;
+        border: 1px solid $line;
+        border-radius: .8rem;
+        background: $white;
+        box-shadow: 0 1rem 3rem rgba(25,53,45,.12);
+    }
+    .header-profile-panel[hidden] { display: none; }
 
     .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 2rem;
-        padding: 1.5rem 0 3.5rem;
+        gap: 1rem;
+        padding: .8rem 0 1rem;
         border-bottom: 1px solid $line;
+        background: $cream;
     }
 
     .brand {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: .5rem;
         color: $ink;
     }
 
     .brand-name {
-        font-size: 1.4rem;
+        font-size: 1.25rem;
         font-weight: 850;
         letter-spacing: -0.05em;
+    }
+
+    .producer-menu {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .35rem;
+    }
+
+    .producer-menu button {
+        appearance: none;
+        min-height: 2rem;
+        padding: .38rem .7rem;
+        border: 1px solid $line;
+        border-radius: .35rem;
+        color: $green-dark;
+        background: $white;
+        font: inherit;
+        font-size: .72rem;
+        font-weight: 750;
+        cursor: pointer;
+        transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
+    }
+
+    .producer-menu button:hover,
+    .producer-menu button:focus-visible,
+    .producer-menu button.active {
+        border-color: $green;
+        color: $white;
+        background: $green;
+        outline: 0;
+    }
+
+    #producer-overview,
+    #producer-tools,
+    #producer-stock,
+    #producer-surplus,
+    #producer-batches {
+        scroll-margin-top: 6rem;
     }
 
     .sih-badge {
@@ -47,6 +119,7 @@
         display: flex;
         align-items: center;
         gap: 1rem;
+        flex-wrap: wrap;
     }
 
     .logged-user {
@@ -61,6 +134,7 @@
     }
 
     .summary-grid {
+        order: 1;
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 1rem;
@@ -105,12 +179,15 @@
     }
 
     .main-grid {
+        order: 2;
         display: grid;
-        grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
+        min-width: 0;
+        grid-template-columns: minmax(20rem, .95fr) minmax(0, 1.35fr);
         gap: 1.25rem;
     }
 
     .panel {
+        min-width: 0;
         padding: 1.5rem;
         border: 1px solid $line;
         border-radius: 1rem;
@@ -241,11 +318,192 @@
     }
 
     .inventory-panel {
+        order: 3;
         margin-top: 1.25rem;
     }
 
-    .producer-tools-grid {
+    .inventory-heading {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .inventory-heading h2 {
+        margin-bottom: .5rem;
+    }
+
+    .inventory-intro {
+        max-width: 42rem;
+        color: $muted;
+        font-size: .86rem;
+        line-height: 1.55;
+    }
+
+    .inventory-insights {
         display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: .8rem;
+        margin: 1.25rem 0;
+    }
+
+    .inventory-insight {
+        padding: .9rem 1rem;
+        border: 1px solid $line;
+        border-radius: .7rem;
+        background: #f8fbf8;
+    }
+
+    .inventory-insight span,
+    .inventory-insight small {
+        display: block;
+        color: $muted;
+        font-size: .72rem;
+    }
+
+    .inventory-insight strong {
+        display: block;
+        margin: .25rem 0;
+        color: $ink;
+        font-size: 1.35rem;
+    }
+
+    .inventory-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .inventory-search {
+        flex: 1 1 18rem;
+    }
+
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    .inventory-search input {
+        margin: 0;
+    }
+
+    .inventory-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .45rem;
+    }
+
+    .inventory-filter {
+        padding: .65rem .85rem;
+        border: 1px solid $line;
+        border-radius: 2rem;
+        color: $ink;
+        background: $white;
+        font: inherit;
+        font-size: .76rem;
+        font-weight: 750;
+        cursor: pointer;
+    }
+
+    .inventory-filter.active,
+    .inventory-filter:hover {
+        border-color: $green;
+        color: $white;
+        background: $green;
+    }
+
+    .inventory-status {
+        display: inline-block;
+        padding: .3rem .5rem;
+        border-radius: 2rem;
+        font-size: .68rem;
+        font-weight: 750;
+        white-space: nowrap;
+    }
+
+    .add-stock-card {
+        margin-top: 1.5rem;
+        padding: 1.25rem;
+        border: 1px solid $line;
+        border-radius: .8rem;
+        background: #fbfdfb;
+    }
+
+    .add-stock-heading {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .add-stock-heading h3 {
+        margin: 0;
+        font-size: 1.1rem;
+    }
+
+    .add-stock-heading p:last-child {
+        max-width: 26rem;
+        color: $muted;
+        font-size: .78rem;
+        line-height: 1.45;
+        text-align: right;
+    }
+
+    .inventory-input-field,
+    .inventory-field {
+        display: flex;
+        flex-direction: column;
+        gap: .4rem;
+    }
+
+    .inventory-input-field span,
+    .inventory-field span {
+        color: $ink;
+        font-size: .75rem;
+        font-weight: 750;
+    }
+
+    .inventory-input-field em,
+    .inventory-field em {
+        color: $muted;
+        font-size: .68rem;
+        font-style: normal;
+        font-weight: 500;
+    }
+
+    .inventory-quantity-group {
+        display: grid;
+        grid-template-columns: minmax(0, 1.3fr) minmax(7rem, .7fr);
+        gap: .7rem;
+    }
+
+    .inventory-barcode-actions {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        gap: .4rem;
+    }
+
+    .inventory-barcode-actions small {
+        color: $muted;
+        font-size: .68rem;
+        line-height: 1.35;
+    }
+
+    .producer-tools-grid {
+        order: 4;
+        display: grid;
+        min-width: 0;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 1.25rem;
         margin-bottom: 1.25rem;
@@ -333,25 +591,94 @@
     }
 
     .capture-photo-button {
-        display: inline-block;
-        width: fit-content;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
         margin-bottom: 1rem;
-        padding: .65rem .85rem;
+        padding: .9rem 1rem;
         border: 1px solid $green;
         border-radius: .55rem;
         color: $green-dark;
-        background: #f5fbf5;
-        font-size: .8rem;
+        background: $white;
+        font: inherit;
         font-weight: 750;
         cursor: pointer;
     }
 
-    .capture-photo-button input {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
+    .capture-photo-button:hover {
+        color: $white;
+        background: $green;
+    }
+
+    .camera-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        display: grid;
+        place-items: center;
+        padding: 1rem;
+        background: rgba(25, 53, 45, .72);
+    }
+
+    .camera-modal[hidden] {
+        display: none;
+    }
+
+    .camera-dialog {
+        width: min(100%, 34rem);
+        padding: 1.25rem;
+        border: 1px solid $line;
+        border-radius: 1rem;
+        background: $white;
+        box-shadow: 0 1.5rem 4rem rgba(25, 53, 45, .2);
+    }
+
+    .camera-dialog-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .camera-dialog-heading h2 {
+        margin: 0;
+    }
+
+    .camera-close-button {
+        border: 0;
+        color: $muted;
+        background: transparent;
+        font-size: 1.8rem;
+        line-height: 1;
+        cursor: pointer;
+    }
+
+    .camera-dialog video {
+        display: block;
+        width: 100%;
+        min-height: 16rem;
+        border-radius: .7rem;
+        object-fit: cover;
+        background: #17251f;
+    }
+
+    .camera-status {
+        min-height: 1.25rem;
+        margin: .8rem 0;
+        color: $muted;
+        font-size: .8rem;
+    }
+
+    .camera-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .7rem;
+    }
+
+    .camera-actions .outline-button {
+        flex: 1 1 10rem;
     }
 
     .pickup-button {
@@ -380,7 +707,7 @@
 
     .inventory-form {
         display: grid;
-        grid-template-columns: 1.4fr 1.2fr .8fr .8fr 1fr auto;
+        grid-template-columns: 1.35fr 1.15fr 1fr 1.15fr;
         gap: .7rem;
         margin-bottom: 1.25rem;
     }
@@ -388,6 +715,11 @@
     .inventory-form .upload-btn {
         width: auto;
         white-space: nowrap;
+    }
+
+    .inventory-form .scan-barcode-button,
+    .inventory-form .upload-btn {
+        min-height: 2.65rem;
     }
 
     .inventory-field {
@@ -450,12 +782,17 @@
         .topbar {
             align-items: flex-start;
             flex-direction: column;
-            padding-bottom: 2rem;
+            gap: .75rem;
+            padding-bottom: 1rem;
         }
 
         .user-section {
             width: 100%;
             justify-content: space-between;
+        }
+
+        .producer-menu {
+            max-width: 100%;
         }
 
         .summary-grid,
@@ -465,8 +802,38 @@
             grid-template-columns: 1fr;
         }
 
+        .main-grid {
+            gap: 1rem;
+        }
+
+        .producer-tools-grid {
+            order: 4;
+        }
+
+        .inventory-toolbar,
+        .add-stock-heading {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .inventory-quantity-group {
+            grid-column: 1;
+        }
+
+        .add-stock-heading p:last-child {
+            text-align: left;
+        }
+
         .dashboard {
             width: min(100% - 2rem, 76rem);
+        }
+
+        #producer-overview,
+        #producer-tools,
+        #producer-stock,
+        #producer-surplus,
+        #producer-batches {
+            scroll-margin-top: 7rem;
         }
 
         .panel {
@@ -479,6 +846,8 @@
         }
 
         .table-wrapper {
+            width: 100%;
+            max-width: 100%;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
         }
@@ -488,7 +857,89 @@
         }
     }
 
+    @media (max-width: 760px) {
+        .dashboard {
+            width: calc(100% - 1.25rem);
+        }
+
+        .topbar,
+        .brand,
+        .user-section,
+        .summary-grid,
+        .main-grid,
+        .producer-tools-grid,
+        .inventory-panel {
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .producer-menu {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            width: 100%;
+        }
+
+        .producer-menu button {
+            text-align: center;
+        }
+
+        .user-section {
+            justify-content: flex-start;
+        }
+
+        .header-profile-panel {
+            max-width: calc(100vw - 1.25rem);
+        }
+
+        input,
+        select,
+        textarea,
+        button {
+            max-width: 100%;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            max-width: 100%;
+        }
+    }
+
     @media (max-width: 480px) {
+        .dashboard {
+            width: calc(100% - 1rem);
+            padding-bottom: 1.5rem;
+        }
+
+        .topbar {
+            gap: .65rem;
+            padding: .65rem 0 .75rem;
+        }
+
+        .brand {
+            width: 100%;
+        }
+
+        .brand-name {
+            font-size: 1.15rem;
+        }
+
+        .user-section {
+            justify-content: flex-start;
+            gap: .5rem;
+        }
+
+        .user-section .outline-button {
+            flex: 1 1 7rem;
+        }
+
+        .header-profile-panel {
+            top: calc(100% + .45rem);
+            right: 0;
+            width: min(100vw - 1rem, 20rem);
+            min-width: 0;
+            padding: .8rem;
+        }
+
         .summary-grid {
             gap: .75rem;
         }
@@ -497,12 +948,69 @@
             padding: 1rem;
         }
 
+        .panel {
+            padding: .85rem;
+            border-radius: .75rem;
+        }
+
+        .panel h2 {
+            margin-bottom: 1rem;
+            font-size: 1.15rem;
+        }
+
         .card-value {
             font-size: 1.25rem;
         }
 
         .inventory-form {
             gap: .85rem;
+        }
+
+        .inventory-insights {
+            grid-template-columns: 1fr;
+        }
+
+        .inventory-filters {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .inventory-filter {
+            padding-inline: .45rem;
+            font-size: .68rem;
+        }
+
+        .inventory-quantity-group {
+            grid-template-columns: 1fr;
+        }
+
+        .inventory-barcode-actions {
+            align-items: stretch;
+        }
+
+        .inventory-barcode-actions .scan-barcode-button,
+        .inventory-form .upload-btn {
+            width: 100%;
+        }
+
+        .camera-dialog {
+            padding: .85rem;
+        }
+
+        .camera-dialog video {
+            min-height: 12rem;
+        }
+
+        .camera-actions {
+            flex-direction: column;
+        }
+
+        .camera-actions .outline-button {
+            width: 100%;
+        }
+
+        .producer-tool {
+            min-width: 0;
         }
     }
 }
