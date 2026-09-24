@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ResQmeal - Food Producer</title>
 
-    <link rel="stylesheet" href="/css/styles.css?v=7">
+    <link rel="stylesheet" href="/css/styles.css?v=9">
     <link rel="stylesheet" href="/css/dashboards/food-producer.css?v=9">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 </head>
 
 <body class="food-producer-dashboard">
@@ -37,6 +38,14 @@
                     <form id="profile-form" class="profile-edit-form">
                         <label for="profile-name">Restaurant or mess name</label>
                         <input id="profile-name" name="displayName" maxlength="120" required>
+                        <label for="profile-location">Pickup location</label>
+                        <input id="profile-location" name="locationAddress" maxlength="240"
+                            placeholder="Address or landmark">
+                        <button type="button" class="location-button" id="use-current-location">Use my current location</button>
+                        <button type="button" class="location-button" id="choose-map-location">Choose on map</button>
+                        <small class="profile-help" id="location-status">Add an address or use your device location for delivery routing.</small>
+                        <input id="profile-latitude" name="latitude" type="hidden">
+                        <input id="profile-longitude" name="longitude" type="hidden">
                         <button type="submit" class="outline-button">Save name</button>
                         <span id="profile-status" class="form-status" role="status"></span>
                     </form>
@@ -439,6 +448,19 @@
     </div>
 
 
+    <div class="location-picker-modal" id="location-picker-modal" hidden>
+        <div class="location-picker-card" role="dialog" aria-modal="true" aria-labelledby="location-picker-title">
+            <div class="location-picker-header">
+                <div><p class="eyebrow">Delivery routing</p><h2 id="location-picker-title">Choose pickup location</h2></div>
+                <button type="button" class="location-picker-close" id="location-picker-close" aria-label="Close map">&times;</button>
+            </div>
+            <p class="profile-help">Click the map where the food can be collected, then confirm the pin.</p>
+            <div class="location-map" id="location-map"></div>
+            <button type="button" class="outline-button" id="confirm-map-location">Use this location</button>
+        </div>
+    </div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" defer></script>
+    <script src="/js/location-picker.js?v=1" defer></script>
     <script src="/js/dashboards/food-producer.js?v=15" defer></script>
 
 </body>

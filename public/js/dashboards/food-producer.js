@@ -208,6 +208,9 @@ async function loadDashboard() {
     const result = await request("/api/food-producer/dashboard");
     const displayName = result.profile.display_name || "";
     document.querySelector("#profile-name").value = displayName;
+    document.querySelector("#profile-location").value = result.profile.location_address || "";
+    document.querySelector("#profile-latitude").value = result.profile.latitude ?? "";
+    document.querySelector("#profile-longitude").value = result.profile.longitude ?? "";
     document.querySelector("#profile-email").textContent = result.profile.email;
     document.querySelector("#header-profile-role").textContent = result.profile.role;
     document.querySelector("#header-profile-avatar").textContent = result.profile.email[0].toUpperCase();
@@ -249,6 +252,26 @@ document.querySelector("#profile-button").addEventListener("click", () => {
     panel.hidden = !panel.hidden;
 });
 
+document.querySelector("#use-current-location").addEventListener("click", () => {
+    const status = document.querySelector("#location-status");
+    const button = document.querySelector("#use-current-location");
+    if (!navigator.geolocation) {
+        status.textContent = "Your browser does not support automatic location. Enter an address instead.";
+        return;
+    }
+    button.disabled = true;
+    status.textContent = "Finding your location...";
+    navigator.geolocation.getCurrentPosition((position) => {
+        document.querySelector("#profile-latitude").value = position.coords.latitude.toFixed(6);
+        document.querySelector("#profile-longitude").value = position.coords.longitude.toFixed(6);
+        status.textContent = "Location found. Save your profile to use it for pickup routing.";
+        button.disabled = false;
+    }, () => {
+        status.textContent = "Location permission was not granted. Enter an address or try again.";
+        button.disabled = false;
+    }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 });
+});
+
 document.querySelector("#profile-form").addEventListener("submit", async (event) => {
     event.preventDefault();
     const status = document.querySelector("#profile-status");
@@ -256,9 +279,17 @@ document.querySelector("#profile-form").addEventListener("submit", async (event)
         const result = await request("/api/profile", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ displayName: document.querySelector("#profile-name").value }),
+            body: JSON.stringify({
+                displayName: document.querySelector("#profile-name").value,
+                locationAddress: document.querySelector("#profile-location").value,
+                latitude: document.querySelector("#profile-latitude").value,
+                longitude: document.querySelector("#profile-longitude").value,
+            }),
         });
         document.querySelector("#profile-name").value = result.profile.display_name;
+        document.querySelector("#profile-location").value = result.profile.location_address || "";
+        document.querySelector("#profile-latitude").value = result.profile.latitude ?? "";
+        document.querySelector("#profile-longitude").value = result.profile.longitude ?? "";
         status.textContent = "Name saved.";
         status.style.color = "";
     } catch (error) {

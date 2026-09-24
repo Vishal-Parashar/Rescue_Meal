@@ -53,8 +53,12 @@ function updateOtpInstructions() {
     button.textContent = "Verify OTP";
     return;
   }
-  source.textContent = assignment.producer_name || assignment.producer_email;
-  destination.textContent = assignment.assigned_shelter || "NGO destination pending";
+  source.textContent = assignment.producer_address
+    ? `${assignment.producer_name || assignment.producer_email} · ${assignment.producer_address}`
+    : (assignment.producer_name || assignment.producer_email);
+  destination.textContent = assignment.ngo_address
+    ? `${assignment.assigned_shelter || "NGO"} · ${assignment.ngo_address}`
+    : (assignment.assigned_shelter || "NGO destination pending");
   const isDelivery = assignment.status === "Picked Up";
   help.textContent = isDelivery
     ? "Delivery step: ask the NGO recipient for the delivery OTP after handoff."

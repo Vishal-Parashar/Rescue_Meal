@@ -58,7 +58,7 @@ async function getSession(request) {
   const token = readCookie(request, "resqmeal_session");
   if (!token) return null;
   const result = await pool.query(
-    `SELECT u.id, u.email, u.display_name, u.role
+    `SELECT u.id, u.email, u.display_name, u.location_address, u.latitude, u.longitude, u.role
      FROM sessions s JOIN users u ON u.id = s.user_id
      WHERE s.token_hash = $1 AND s.expires_at > NOW() AND u.is_active = TRUE`,
     [hashToken(token)],
@@ -212,15 +212,33 @@ app.get("/api/profile", async (req, res, next) => {
 
 app.patch("/api/profile", async (req, res, next) => {
   const displayName = typeof req.body.displayName === "string" ? req.body.displayName.trim() : "";
+  const hasLocationFields = ["locationAddress", "latitude", "longitude"].some((field) => Object.prototype.hasOwnProperty.call(req.body, field));
+  const locationAddress = typeof req.body.locationAddress === "string" ? req.body.locationAddress.trim() : "";
+  const latitude = req.body.latitude === "" || req.body.latitude == null ? null : Number(req.body.latitude);
+  const longitude = req.body.longitude === "" || req.body.longitude == null ? null : Number(req.body.longitude);
   if (!displayName || displayName.length > 120) {
     return res.status(400).json({ error: "A profile name between 1 and 120 characters is required." });
+  }
+  if (locationAddress.length > 240) {
+    return res.status(400).json({ error: "Location address must be 240 characters or fewer." });
+  }
+  if ((latitude !== null && (!Number.isFinite(latitude) || latitude < -90 || latitude > 90))
+    || (longitude !== null && (!Number.isFinite(longitude) || longitude < -180 || longitude > 180))
+    || ((latitude === null) !== (longitude === null))) {
+    return res.status(400).json({ error: "Provide both valid latitude and longitude values, or leave both blank." });
   }
   try {
     const session = await getSession(req);
     if (!session) return res.status(401).json({ error: "Authentication required." });
     const result = await pool.query(
-      "UPDATE users SET display_name = $1 WHERE id = $2 RETURNING id, email, display_name, role",
-      [displayName, session.id],
+      `UPDATE users
+       SET display_name = $1,
+           location_address = CASE WHEN $2 THEN $3 ELSE location_address END,
+           latitude = CASE WHEN $2 THEN $4 ELSE latitude END,
+           longitude = CASE WHEN $2 THEN $5 ELSE longitude END
+       WHERE id = $6
+       RETURNING id, email, display_name, location_address, latitude, longitude, role`,
+      [displayName, hasLocationFields, locationAddress || null, latitude, longitude, session.id],
     );
     return res.json({ profile: result.rows[0] });
   } catch (error) {
@@ -311,8 +329,11 @@ app.get("/api/admin/operations", async (req, res, next) => {
         `SELECT b.id, b.batch_code, b.food_description, b.food_category, b.quantity,
                 b.quantity_value, b.status, b.assigned_shelter, b.assigned_ngo_id,
                 b.delivery_partner_id, b.created_at, u.email AS producer_email,
-                u.display_name AS producer_name, n.email AS ngo_email,
-                n.display_name AS ngo_name, d.email AS delivery_partner_email
+                u.display_name AS producer_name, u.location_address AS producer_address,
+                u.latitude AS source_lat, u.longitude AS source_lng,
+                n.email AS ngo_email, n.display_name AS ngo_name,
+                n.location_address AS ngo_address, n.latitude AS destination_lat,
+                n.longitude AS destination_lng, d.email AS delivery_partner_email
          FROM food_batches b
          JOIN users u ON u.id = b.producer_id
          LEFT JOIN users n ON n.id = b.assigned_ngo_id
@@ -438,9 +459,13 @@ app.get("/api/delivery/dashboard", async (req, res, next) => {
       pool.query(
       `SELECT b.id, b.batch_code, b.food_description, b.quantity,
               b.status, b.assigned_shelter, b.created_at,
-              u.email AS producer_email, u.display_name AS producer_name
+              u.email AS producer_email, u.display_name AS producer_name,
+              u.location_address AS producer_address, u.latitude AS source_lat,
+              u.longitude AS source_lng, n.location_address AS ngo_address,
+              n.latitude AS destination_lat, n.longitude AS destination_lng
        FROM food_batches b
        JOIN users u ON u.id = b.producer_id
+       LEFT JOIN users n ON n.id = b.assigned_ngo_id
        WHERE b.delivery_partner_id = $1 AND b.status IN ('Awaiting Pickup', 'Picked Up')
        ORDER BY b.created_at ASC`,
       [session.id],

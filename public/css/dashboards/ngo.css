@@ -443,6 +443,93 @@ input:focus, select:focus {
   text-align: left;
 }
 
+.profile-help {
+  color: #70827b;
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.location-button {
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid #dce5df;
+  border-radius: 0.5rem;
+  color: #205c48;
+  background: #ffffff;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.location-button:hover {
+  border-color: #2f7d61;
+  background: #f3faf4;
+}
+
+.location-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.location-picker-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(25, 53, 45, 0.45);
+}
+
+.location-picker-modal[hidden] {
+  display: none;
+}
+
+.location-picker-card {
+  width: min(100%, 34rem);
+  padding: 1rem;
+  border: 1px solid #dce5df;
+  border-radius: 0.9rem;
+  background: #ffffff;
+  box-shadow: 0 1.5rem 4rem rgba(25, 53, 45, 0.2);
+}
+
+.location-picker-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.location-picker-header h2 {
+  margin-bottom: 0.5rem;
+  font-size: 1.35rem;
+}
+
+.location-picker-close {
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid #dce5df;
+  border-radius: 50%;
+  color: #70827b;
+  background: #ffffff;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.location-map {
+  height: min(55vh, 24rem);
+  min-height: 16rem;
+  margin: 0.75rem 0;
+  overflow: hidden;
+  border-radius: 0.65rem;
+}
+
+.location-picker-card > #confirm-map-location {
+  width: 100%;
+}
+
 /* Shared dashboard visual language */
 .admin-dashboard,
 .delivery-partner-dashboard,

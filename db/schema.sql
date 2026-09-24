@@ -2,12 +2,18 @@ CREATE TABLE IF NOT EXISTS users (
   id BIGSERIAL PRIMARY KEY,
   email TEXT NOT NULL UNIQUE,
   display_name TEXT,
+  location_address TEXT,
+  latitude NUMERIC(9, 6),
+  longitude NUMERIC(9, 6),
   password_hash TEXT NOT NULL,
   role TEXT NOT NULL CHECK (role IN ('Admin', 'NGO', 'FoodProducer', 'delivery partner')),
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 ALTER TABLE users ADD COLUMN IF NOT EXISTS display_name TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS location_address TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS latitude NUMERIC(9, 6);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS longitude NUMERIC(9, 6);
 
 CREATE TABLE IF NOT EXISTS sessions (
   token_hash TEXT PRIMARY KEY,
