@@ -98,6 +98,7 @@
     }
 
     #producer-overview,
+    #producer-planning,
     #producer-tools,
     #producer-stock,
     #producer-surplus,
@@ -778,6 +779,62 @@
         background: #17251f;
     }
 
+    .producer-insights {
+        order: 2;
+        margin: 0 0 1.25rem;
+    }
+
+    .insight-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .insight-heading h2 { margin: .2rem 0 .35rem; font-size: 1.35rem; }
+    .insight-heading p:last-child { margin: 0; color: $muted; font-size: .82rem; }
+    .insight-updated { color: $muted; font-size: .72rem; white-space: nowrap; }
+
+    .planning-grid,
+    .alert-metric-grid {
+        display: grid;
+        grid-template-columns: 1.5fr repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .metric-card,
+    .planning-card,
+    .alert-card,
+    .resource-card,
+    .sustainability-card { min-height: 9rem; }
+
+    .planning-card h3,
+    .alert-card h3 { margin: .2rem 0 .45rem; font-size: 1rem; }
+    .planning-card > strong { display: block; color: $green-dark; font-size: 1rem; line-height: 1.35; }
+    .planning-card > p:not(.eyebrow) { min-height: 2.4rem; margin: .45rem 0 .8rem; color: $muted; font-size: .78rem; line-height: 1.45; }
+    .metric-card > span { display: block; color: $muted; font-size: .75rem; }
+    .metric-card > strong { display: block; margin: .7rem 0 .25rem; color: $ink; font-size: 1.65rem; }
+    .metric-card > small { color: $muted; font-size: .72rem; line-height: 1.4; }
+    .progress-track { height: .45rem; overflow: hidden; border-radius: 1rem; background: #e8eee9; }
+    .progress-track span { display: block; width: 0; height: 100%; border-radius: inherit; background: $green; transition: width 300ms ease; }
+    .planning-card small { display: block; margin-top: .4rem; color: $muted; font-size: .7rem; }
+    .alert-card { border-left: 4px solid #8ac59a; }
+    .alert-card.has-alert { border-left-color: #d6953d; background: #fffaf0; }
+    .alert-card p:not(.eyebrow), .resource-card > p:last-child, .sustainability-card > p:last-child { color: $muted; font-size: .76rem; line-height: 1.45; }
+    .insight-action { margin-top: .3rem; padding: .5rem .7rem; font-size: .72rem; }
+    .resource-row { display: flex; justify-content: space-between; gap: .75rem; padding: .55rem 0; border-bottom: 1px solid #edf1ee; color: $muted; font-size: .76rem; }
+    .resource-row strong { color: $green-dark; }
+    .sustainability-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; margin: .7rem 0 .3rem; }
+    .sustainability-stats strong, .sustainability-stats span { display: block; }
+    .sustainability-stats strong { color: $green-dark; font-size: 1.2rem; }
+    .sustainability-stats span { color: $muted; font-size: .65rem; }
+
+    .main-grid { order: 3; }
+    .inventory-panel { order: 4; }
+    .producer-tools-grid { order: 5; }
+
     @media (max-width: 1024px) {
         .topbar {
             align-items: flex-start;
@@ -806,9 +863,10 @@
             gap: 1rem;
         }
 
-        .producer-tools-grid {
-            order: 4;
-        }
+        .producer-tools-grid { order: 5; }
+        .planning-grid,
+        .alert-metric-grid { grid-template-columns: 1fr; }
+        .insight-heading { align-items: flex-start; flex-direction: column; gap: .35rem; }
 
         .inventory-toolbar,
         .add-stock-heading {
@@ -829,6 +887,7 @@
         }
 
         #producer-overview,
+        #producer-planning,
         #producer-tools,
         #producer-stock,
         #producer-surplus,

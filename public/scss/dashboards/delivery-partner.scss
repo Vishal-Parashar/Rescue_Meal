@@ -26,6 +26,13 @@
     letter-spacing: -.05em;
   }
 
+  .delivery-menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+    margin-top: .65rem;
+  }
+
   .top-nav .badge {
     margin-left: .6rem;
     padding: .3rem .55rem;

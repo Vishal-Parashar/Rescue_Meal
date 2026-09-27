@@ -13,6 +13,12 @@ let barcodeDetector = null;
 let barcodeFrame = null;
 let inventoryFilter = "all";
 let inventorySearch = "";
+const demoSensorReading = {
+    temperature_c: 4.2,
+    humidity_percent: 58,
+    reading_source: "demo",
+    recorded_at: new Date().toISOString(),
+};
 
 document.querySelectorAll("[data-section-target]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -22,7 +28,27 @@ document.querySelectorAll("[data-section-target]").forEach((button) => {
         document.querySelectorAll("[data-section-target]").forEach((menuButton) => {
             menuButton.classList.toggle("active", menuButton === button);
         });
+
     });
+});
+
+const menuToggle = document.querySelector("#menu-toggle");
+const accountMenu = document.querySelector("#account-menu");
+menuToggle.addEventListener("click", () => {
+    accountMenu.hidden = !accountMenu.hidden;
+    menuToggle.setAttribute("aria-expanded", String(!accountMenu.hidden));
+});
+document.addEventListener("click", (event) => {
+    if (!accountMenu.hidden && !accountMenu.contains(event.target) && event.target !== menuToggle) {
+        accountMenu.hidden = true;
+        menuToggle.setAttribute("aria-expanded", "false");
+    }
+});
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+        accountMenu.hidden = true;
+        menuToggle.setAttribute("aria-expanded", "false");
+    }
 });
 
 function stopBarcodeScanner() {
@@ -102,6 +128,50 @@ function renderSummary(summary) {
     document.querySelector("#salvaged-meals").textContent = summary.salvaged_meals || 0;
 }
 
+function renderProducerInsights(summary, batches, inventory, reading) {
+    const pending = batches.filter((batch) => ["Awaiting Pickup", "Picked Up"].includes(batch.status));
+    const delivered = batches.filter((batch) => batch.status === "Delivered");
+    const pendingQuantity = pending.reduce((total, batch) => total + (Number(batch.quantity_value ?? batch.quantity) || 0), 0);
+    const deliveredQuantity = delivered.reduce((total, batch) => total + (Number(batch.quantity_value ?? batch.quantity) || 0), 0);
+    const totalQuantity = batches.reduce((total, batch) => total + (Number(batch.quantity_value ?? batch.quantity) || 0), 0);
+    const expiring = inventory.filter((item) => inventoryFlags(item).expiring);
+    const lowStock = inventory.filter((item) => inventoryFlags(item).low);
+    const coverage = Math.min(100, totalQuantity ? Math.round((pendingQuantity / totalQuantity) * 100) : 0);
+    const efficiency = totalQuantity ? Math.round((deliveredQuantity / totalQuantity) * 100) : 0;
+    const risk = expiring.length + pending.length >= 4 ? "High" : expiring.length || pending.length ? "Watch" : "Low";
+    const riskDetail = expiring.length ? `${expiring.length} item${expiring.length === 1 ? "" : "s"} expire within 3 days.` : "No stock is currently inside the 3-day expiry window.";
+    const plan = expiring.length
+        ? `Prioritise ${expiring[0].item_name} before producing more.`
+        : pending.length ? "Stage pending batches and confirm pickup capacity." : "Log today's expected demand before starting a new batch.";
+
+    document.querySelector("#planning-recommendation").textContent = plan;
+    document.querySelector("#planning-detail").textContent = lowStock.length
+        ? `${lowStock.length} low-stock item${lowStock.length === 1 ? "" : "s"} need replenishment or a menu substitution.`
+        : "Stock levels look balanced against current batch activity.";
+    document.querySelector("#planning-progress").style.width = `${coverage}%`;
+    document.querySelector("#planning-progress-label").textContent = `Active demand coverage: ${coverage}% (${pendingQuantity || 0} servings)`;
+    document.querySelector("#surplus-risk").textContent = risk;
+    document.querySelector("#surplus-risk-detail").textContent = riskDetail;
+    document.querySelector("#processing-efficiency").textContent = `${efficiency}%`;
+    document.querySelector("#processing-efficiency-detail").textContent = `${deliveredQuantity || 0} of ${totalQuantity || 0} logged servings delivered`;
+    document.querySelector("#expiry-alert-title").textContent = expiring.length ? `${expiring.length} expiry alert${expiring.length === 1 ? "" : "s"}` : "No urgent alerts";
+    document.querySelector("#expiry-alert-detail").textContent = expiring.length ? `${expiring.map((item) => item.item_name).slice(0, 2).join(", ")} need a quality check or surplus release.` : "Keep checking labels and storage conditions as stock arrives.";
+    document.querySelector("#expiry-alert-card").classList.toggle("has-alert", Boolean(expiring.length));
+    const safeStorage = reading && Number(reading.temperature_c) <= 5 && Number(reading.humidity_percent) <= 65;
+    document.querySelector("#energy-health").textContent = reading ? (safeStorage ? "Efficient" : "Review") : "No reading";
+    document.querySelector("#energy-load").textContent = reading ? (safeStorage ? "Low" : "Elevated") : "--";
+    document.querySelector("#resource-detail").textContent = reading
+        ? `Latest reading: ${Number(reading.temperature_c).toFixed(1)}°C and ${Math.round(Number(reading.humidity_percent))}% humidity.`
+        : "Refresh the sensor panel to estimate the current energy load.";
+    const salvaged = Number(summary.salvaged_meals) || deliveredQuantity;
+    const estimatedKg = Math.round((salvaged * 0.35 + inventory.reduce((total, item) => total + (Number(item.quantity) || 0), 0)) * 10) / 10;
+    const recoveryRate = totalQuantity ? Math.round((salvaged / totalQuantity) * 100) : 0;
+    document.querySelector("#sustainability-meals").textContent = salvaged;
+    document.querySelector("#sustainability-kg").textContent = estimatedKg;
+    document.querySelector("#sustainability-rate").textContent = `${recoveryRate}%`;
+    document.querySelector("#insight-updated").textContent = `Updated ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+}
+
 function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, (character) => ({
         "&": "&amp;",
@@ -132,6 +202,21 @@ function updateInventoryInsights(items) {
     document.querySelector("#inventory-total").textContent = items.length;
     document.querySelector("#inventory-low").textContent = items.filter((item) => inventoryFlags(item).low).length;
     document.querySelector("#inventory-expiring").textContent = items.filter((item) => inventoryFlags(item).expiring).length;
+}
+
+function renderLatestReading(reading) {
+    const currentReading = reading || demoSensorReading;
+    const temperature = Number(currentReading.temperature_c);
+    const humidity = Number(currentReading.humidity_percent);
+    const isDemo = currentReading.reading_source === "demo";
+    document.querySelector("#storage-temperature").textContent = `${temperature.toFixed(1)}°C`;
+    document.querySelector("#storage-humidity").textContent = `${Math.round(humidity)}%`;
+    document.querySelector("#temperature-status").textContent = `${isDemo ? "Demo · " : ""}${temperature <= 5 ? "Within cold-storage range" : "Check cooling"}`;
+    document.querySelector("#humidity-status").textContent = `${isDemo ? "Demo · " : ""}${humidity <= 65 ? "Within target range" : "Ventilation needed"}`;
+    document.querySelector("#storage-health").textContent = temperature <= 5 && humidity <= 65
+        ? `${isDemo ? "Demo storage health" : "Storage health"}: Good. Cooling is operating within the target range.`
+        : `${isDemo ? "Demo storage health" : "Storage health"}: Attention needed. Check the cooling or ventilation system.`;
+    document.querySelector("#storage-health").classList.toggle("storage-warning", !(temperature <= 5 && humidity <= 65));
 }
 
 function requestPickup(item) {
@@ -217,6 +302,9 @@ async function loadDashboard() {
     renderSummary(result.summary);
     renderBatches(result.batches);
     renderInventory(result.inventory);
+    const reading = result.readings?.[0] || demoSensorReading;
+    renderLatestReading(reading);
+    renderProducerInsights(result.summary, result.batches, result.inventory, reading);
 }
 
 let refreshInProgress = false;
@@ -228,6 +316,9 @@ async function refreshBatches() {
         renderSummary(result.summary);
         renderBatches(result.batches);
         renderInventory(result.inventory);
+        const reading = result.readings?.[0] || demoSensorReading;
+        renderLatestReading(reading);
+        renderProducerInsights(result.summary, result.batches, result.inventory, reading);
     } catch (error) {
         if (error.message === "Authentication required.") {
             window.location.replace("/");
@@ -362,25 +453,37 @@ document.addEventListener("click", (event) => {
     }
 });
 
-document.querySelector("#simulate-sensor").addEventListener("click", () => {
+document.querySelector("#simulate-sensor").addEventListener("click", async () => {
     const temperature = 2 + Math.random() * 5;
     const humidity = 45 + Math.random() * 20;
-    const safe = temperature <= 5 && humidity <= 65;
-    document.querySelector("#storage-temperature").textContent = `${temperature.toFixed(1)}°C`;
-    document.querySelector("#storage-humidity").textContent = `${Math.round(humidity)}%`;
-    document.querySelector("#temperature-status").textContent = temperature <= 5 ? "Within cold-storage range" : "Check cooling";
-    document.querySelector("#humidity-status").textContent = humidity <= 65 ? "Within target range" : "Ventilation needed";
-    document.querySelector("#storage-health").textContent = safe
-        ? "Storage health: Good. Cooling is operating within the target range."
-        : "Storage health: Attention needed. Check the cooling or ventilation system.";
-    document.querySelector("#storage-health").classList.toggle("storage-warning", !safe);
+    try {
+        const result = await request("/api/food-producer/sensors/readings", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ temperatureC: temperature, humidityPercent: humidity, source: "simulated" }),
+        });
+        renderLatestReading(result.reading);
+    } catch (error) {
+        document.querySelector("#storage-health").textContent = error.message;
+    }
 });
 
 function updateMaterialImage(event) {
     const file = event.target.files[0];
-    document.querySelector("#cv-result").textContent = file
-        ? `${file.name} is ready for computer-vision analysis. Confirm the detected details before adding stock.`
-        : "No material image selected.";
+    if (!file) {
+        document.querySelector("#cv-result").textContent = "No material image selected.";
+        return;
+    }
+    document.querySelector("#cv-result").textContent = `${file.name} is being checked...`;
+    request("/api/food-producer/quality-images", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileName: file.name, mimeType: file.type, notes: "Manual upload from producer dashboard" }),
+    }).then((result) => {
+        const analysis = result.analysis || {};
+        document.querySelector("#cv-result").textContent =
+            `${file.name}: simulated quality ${analysis.qualityScore || "unrated"}/100; ${(analysis.detectedLabels || []).join(", ")}.`;
+    }).catch((error) => {
+        document.querySelector("#cv-result").textContent = `Image metadata saved locally; analysis unavailable: ${error.message}`;
+    });
 }
 
 document.querySelector("#material-image").addEventListener("change", updateMaterialImage);

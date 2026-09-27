@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ResQmeal - Central Redistribution Ops</title>
-  <link rel="stylesheet" href="/css/styles.css?v=8">
+  <link rel="stylesheet" href="/css/styles.css?v=12">
   <link rel="stylesheet" href="/css/dashboards/admin.css?v=10">
 </head>
 <body class="admin-dashboard">
@@ -14,18 +14,19 @@
     <div class="brand">
       <span class="logo">ResQmeal</span>
       <nav class="admin-menu" aria-label="Admin dashboard sections">
-        <button type="button" data-section-target="admin-overview">Overview</button>
-        <button type="button" data-section-target="redistribution-management">Redistribution</button>
-        <button type="button" data-section-target="waste-analytics">Analytics</button>
-        <button type="button" data-section-target="redistribution-requests">Requests</button>
-        <button type="button" data-section-target="esg-score">ESG score</button>
-        <button type="button" data-section-target="user-management">Users</button>
+        <a class="dashboard-nav-link" data-dashboard-link data-dashboard-home="true" data-dashboard-target="admin-overview" href="/dashboard/admin/overview">Home</a>
+        <a class="dashboard-nav-link" data-dashboard-link data-dashboard-target="redistribution-management,redistribution-requests" href="/dashboard/admin/operations">Manage food distribution</a>
+        <a class="dashboard-nav-link" data-dashboard-link data-dashboard-target="waste-analytics,smart-planning,processing-monitor" href="/dashboard/admin/intelligence">Plan and monitor food</a>
+        <a class="dashboard-nav-link" data-dashboard-link data-dashboard-target="sustainability-report,esg-score" href="/dashboard/admin/sustainability">View impact reports</a>
+        <a class="dashboard-nav-link" data-dashboard-link data-dashboard-target="user-management,admin-account-management" href="/dashboard/admin/users">Manage accounts</a>
       </nav>
     </div>
     <div class="user-meta">
-      <button class="profile-button outline-button" id="profile-button" type="button">Profile</button>
-      <button class="btn-logout outline-button" id="logout-button" type="button">Sign out</button>
-      <div class="header-profile-panel" id="header-profile-panel" hidden>
+      <button class="menu-toggle" id="menu-toggle" type="button" aria-label="Open account menu" aria-expanded="false">•••</button>
+      <div class="account-menu" id="account-menu" hidden>
+        <button class="profile-button menu-item" id="profile-button" type="button">Profile</button>
+        <button class="btn-logout menu-item" id="logout-button" type="button">Sign out</button>
+        <div class="header-profile-panel" id="header-profile-panel" hidden>
         <div class="avatar" id="header-profile-avatar">A</div>
         <div>
           <span class="profile-label">Signed in as</span>
@@ -37,6 +38,7 @@
             <button type="submit" class="outline-button">Save name</button>
             <span id="profile-status" class="form-status" role="status"></span>
           </form>
+          </div>
         </div>
       </div>
     </div>
@@ -145,6 +147,9 @@
         <div class="analytics-insight" id="ai-forecast-insight">
           AI forecast is loading...
         </div>
+        <div class="analytics-insight" id="admin-mvp-analytics">
+          Expiry and sensor analytics are loading...
+        </div>
       </article>
     </section>
 
@@ -183,6 +188,50 @@
       </article>
     </section>
 
+    <section class="smart-operations-grid" id="smart-planning">
+      <article class="panel">
+        <p class="eyebrow">AI production planning</p>
+        <h2 class="panel-title">Plan the next production cycle</h2>
+        <p class="panel-intro">Use current demand, available stock, and safety buffers to create a practical production recommendation.</p>
+        <form class="planning-form" id="planning-form">
+          <label>Planning horizon (days)<input id="planning-horizon" type="number" min="1" max="30" value="7" required></label>
+          <label>Safety buffer (%)<input id="planning-buffer" type="number" min="0" max="100" value="10" required></label>
+          <label>Available servings<input id="planning-stock" type="number" min="0" value="0" required></label>
+          <button class="outline-button" type="submit">Generate plan</button>
+        </form>
+        <div class="planning-result" id="planning-result" role="status">Enter planning inputs to generate a recommendation.</div>
+      </article>
+
+      <article class="panel" id="processing-monitor">
+        <p class="eyebrow">Processing efficiency</p>
+        <h2 class="panel-title">Operational performance</h2>
+        <div class="operations-kpi-grid">
+          <div><span>Batch recovery rate</span><strong id="processing-recovery">0%</strong><small>Delivered / submitted</small></div>
+          <div><span>Inventory at risk</span><strong id="processing-risk">0</strong><small>Items expiring within 3 days</small></div>
+          <div><span>Storage safety</span><strong id="processing-safety">--</strong><small>Recent sensor readings</small></div>
+          <div><span>Resource signal</span><strong id="processing-resource">--</strong><small>Energy and loss tracking readiness</small></div>
+        </div>
+        <div class="operational-checklist" id="operational-checklist"></div>
+      </article>
+    </section>
+
+    <section class="panel sustainability-report" id="sustainability-report">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Sustainability and ESG</p>
+          <h2 class="panel-title">Impact report</h2>
+        </div>
+        <button class="outline-button" id="export-impact-report" type="button">Export impact report</button>
+      </div>
+      <div class="impact-grid">
+        <div><span>Meals rescued</span><strong id="impact-meals">0</strong><small>servings diverted from waste</small></div>
+        <div><span>Estimated CO₂ avoided</span><strong id="impact-carbon">0 kg</strong><small>planning estimate: 1.9 kg/serving</small></div>
+        <div><span>Resource efficiency</span><strong id="impact-efficiency">0%</strong><small>recovery against submitted food</small></div>
+        <div><span>ESG readiness</span><strong id="impact-readiness">In progress</strong><small>Connect energy and waste meters for verified reporting</small></div>
+      </div>
+      <p class="report-note" id="report-note">This operational report clearly labels estimates until verified energy, water, and waste-meter data are connected.</p>
+    </section>
+
     <section class="user-management panel" id="user-management">
       <div class="section-heading">
         <div>
@@ -210,7 +259,7 @@
       </div>
     </section>
 
-    <section class="user-management panel">
+    <section class="user-management panel" id="admin-account-management">
       <div class="section-heading">
         <div>
           <p class="eyebrow">Admin-only account creation</p>
@@ -241,6 +290,7 @@
     </div>
   </div>
 
+  <script src="/js/dashboard-navigation.js?v=5" defer></script>
   <script src="/js/dashboards/admin.js?v=14" defer></script>
 </body>
 </html>

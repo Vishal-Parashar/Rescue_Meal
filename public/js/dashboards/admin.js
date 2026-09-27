@@ -34,7 +34,27 @@ document.querySelectorAll("[data-section-target]").forEach((button) => {
     document.querySelectorAll("[data-section-target]").forEach((menuButton) => {
       menuButton.classList.toggle("active", menuButton === button);
     });
+
   });
+});
+
+const menuToggle = document.querySelector("#menu-toggle");
+const accountMenu = document.querySelector("#account-menu");
+menuToggle.addEventListener("click", () => {
+  accountMenu.hidden = !accountMenu.hidden;
+  menuToggle.setAttribute("aria-expanded", String(!accountMenu.hidden));
+});
+document.addEventListener("click", (event) => {
+  if (!accountMenu.hidden && !accountMenu.contains(event.target) && event.target !== menuToggle) {
+    accountMenu.hidden = true;
+    menuToggle.setAttribute("aria-expanded", "false");
+  }
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    accountMenu.hidden = true;
+    menuToggle.setAttribute("aria-expanded", "false");
+  }
 });
 
 function normalizeFoodCategory(category) {
@@ -101,6 +121,50 @@ function renderEsg(metrics, batches, requirements) {
   document.querySelector("#esg-requests").textContent = requirements.length;
 }
 
+function renderSmartOperations(data, analytics) {
+  const batches = data.batches || [];
+  const metrics = data.metrics || {};
+  const delivered = batches.filter((batch) => batch.status === "Delivered");
+  const rescued = delivered.reduce((sum, batch) => sum + Number(batch.quantity_value || 0), 0);
+  const total = Number(metrics.totalPrepared || 0);
+  const recoveryRate = total ? Math.round((rescued / total) * 100) : 0;
+  const expiryCount = (analytics.expiryAlerts || []).length;
+  const sensor = analytics.sensorHealth || {};
+  const sensorReadings = Number(sensor.readings || 0);
+  const unsafeReadings = Number(sensor.unsafe || 0);
+
+  document.querySelector("#processing-recovery").textContent = `${recoveryRate}%`;
+  document.querySelector("#processing-risk").textContent = expiryCount;
+  document.querySelector("#processing-safety").textContent = sensorReadings
+    ? `${Math.round(((sensorReadings - unsafeReadings) / sensorReadings) * 100)}%`
+    : "N/A";
+  document.querySelector("#processing-resource").textContent = "Ready";
+  document.querySelector("#operational-checklist").innerHTML = [
+    ["Demand forecast", "AI forecast and open requirements are connected."],
+    ["Expiry prevention", expiryCount ? `${expiryCount} items need review within 3 days.` : "No near-expiry items detected."],
+    ["IoT readiness", sensorReadings ? `${sensorReadings} recent readings received.` : "Waiting for sensor readings."],
+    ["Processing telemetry", "Energy, machine downtime, and raw-material loss endpoints can be connected next."],
+  ].map(([title, detail]) => `<div><strong>${escapeHtml(title)}</strong><span>${escapeHtml(detail)}</span></div>`).join("");
+
+  document.querySelector("#impact-meals").textContent = rescued.toLocaleString();
+  document.querySelector("#impact-carbon").textContent = `${(rescued * 1.9).toFixed(1)} kg`;
+  document.querySelector("#impact-efficiency").textContent = `${recoveryRate}%`;
+  document.querySelector("#impact-readiness").textContent = sensorReadings ? "Operational" : "In progress";
+}
+
+function generateProductionPlan(event) {
+  event.preventDefault();
+  const horizon = Number(document.querySelector("#planning-horizon").value);
+  const buffer = Number(document.querySelector("#planning-buffer").value);
+  const stock = Number(document.querySelector("#planning-stock").value);
+  const requirements = window.adminRequirements || [];
+  const demand = requirements.reduce((sum, item) => sum + Number(item.servings || 0), 0);
+  const dailyDemand = demand / Math.max(horizon, 1);
+  const target = Math.ceil(demand * (1 + buffer / 100));
+  const production = Math.max(0, target - stock);
+  document.querySelector("#planning-result").innerHTML = `<strong>Recommendation:</strong> plan <strong>${production.toLocaleString()} servings</strong> across ${horizon} days (${Math.ceil(production / Math.max(horizon, 1))}/day). Current open demand is ${demand.toLocaleString()} servings (${dailyDemand.toFixed(1)}/day); keep ${buffer}% buffer and review expiry alerts before producing more.`;
+}
+
 function getDemandForecast(batches, requirements) {
   const week = 7 * 24 * 60 * 60 * 1000;
   const recentBatches = batches.filter((batch) => Date.now() - new Date(batch.created_at).getTime() <= week);
@@ -131,9 +195,26 @@ function getDemandForecast(batches, requirements) {
   return { label: "Balanced", percent: 10, insight: "Projected food availability is currently aligned with open consumer demand." };
 }
 
+async function loadMvpAnalytics() {
+  const target = document.querySelector("#admin-mvp-analytics");
+  if (!target) return;
+  try {
+    const result = await request("/api/admin/analytics");
+    const alerts = result.expiryAlerts || [];
+    const sensor = result.sensorHealth || {};
+    const impact = result.impact || {};
+    target.innerHTML = `<strong>Operational signals:</strong> ${alerts.length} expiry alert${alerts.length === 1 ? "" : "s"} in 3 days · ${sensor.unsafe || 0}/${sensor.readings || 0} unsafe sensor readings (7d) · ${impact.rescued_servings || 0} rescued servings.`;
+    return result;
+  } catch (error) {
+    target.textContent = `Operational analytics unavailable: ${error.message}`;
+    return { expiryAlerts: [], sensorHealth: {}, impact: {}, error: error.message };
+  }
+}
+
 function renderOperations(data) {
   const { metrics, batches, requirements, deliveryPartners } = data;
   window.adminBatches = batches;
+  window.adminRequirements = requirements || [];
   const awaitingBatches = batches.filter((batch) => batch.status === "Awaiting Pickup").length;
   const deliveredBatches = batches.filter((batch) => batch.status === "Delivered").length;
   const rescuedServings = batches
@@ -164,6 +245,7 @@ function renderOperations(data) {
   } else {
     insight.innerHTML = `<strong>Progress:</strong> ${metrics.dispatchEfficiency}% of submitted batches have been delivered.`;
   }
+
   renderRequests(requirements || []);
   renderEsg(metrics, batches, requirements || []);
   loadAiForecast(batches, requirements || []);
@@ -174,8 +256,8 @@ function renderOperations(data) {
       <td class="bold"><button type="button" class="batch-details-button" data-batch-details="${batch.id}">#${escapeHtml(batch.batch_code)}</button></td>
       <td><strong>${escapeHtml(batch.producer_name || batch.producer_email)}</strong><br><small>${escapeHtml(batch.producer_email)}</small></td>
       <td>${new Date(batch.created_at).toLocaleDateString()}</td>
-      <td><select class="custom-select requirement-select" ${batch.status !== "Awaiting Pickup" ? "disabled" : ""}>
-        <option value="">${batch.status === "Awaiting Pickup" ? "Choose NGO requirement" : `Assigned NGO: ${escapeHtml(formatNgoName(batch.ngo_name, batch.ngo_email))}`}</option>
+      <td><select class="custom-select requirement-select" ${(batch.status !== "Awaiting Pickup" || batch.assigned_ngo_id) ? "disabled" : ""}>
+        <option value="">${batch.assigned_ngo_id ? `Auto-assigned: ${escapeHtml(formatNgoName(batch.ngo_name, batch.ngo_email))}${batch.assignment_distance_km == null ? "" : ` · ${escapeHtml(batch.assignment_distance_km)} km`}` : batch.status === "Awaiting Pickup" ? "Choose NGO requirement" : `Assigned NGO: ${escapeHtml(formatNgoName(batch.ngo_name, batch.ngo_email))}`}</option>
         ${(requirements || []).filter((item) => normalizeFoodCategory(item.food_category) === normalizeFoodCategory(batch.food_category) && Number(item.servings) <= Number(batch.quantity_value)).map((item) => `<option value="${item.id}">NGO: ${escapeHtml(formatNgoName(item.ngo_name, item.ngo_email))} · ${escapeHtml(item.food_description)} · ${item.servings} servings</option>`).join("")}
       </select></td>
       <td><select class="custom-select driver-select" ${batch.status !== "Awaiting Pickup" ? "disabled" : ""}>
@@ -197,7 +279,7 @@ async function loadAiForecast(batches, requirements) {
       insight.innerHTML = `<strong>AI forecast:</strong> ${escapeHtml(result.error)}`;
       return;
     }
-    const forecast = result.data || {};
+    const forecast = result.data || result;
     insight.innerHTML = `<strong>AI forecast (${escapeHtml(forecast.confidence || "Unrated")} confidence):</strong> ${escapeHtml(forecast.outlook || "No outlook available")} - ${escapeHtml(forecast.recommendation || "No recommendation available")}`;
   } catch (error) {
     insight.innerHTML = `<strong>AI forecast unavailable:</strong> ${escapeHtml(error.message)}`;
@@ -238,6 +320,8 @@ async function loadDashboard() {
     ]);
     renderOperations(operations);
     renderUsers(users.users);
+    const analytics = await loadMvpAnalytics();
+    renderSmartOperations(operations, analytics);
   } catch (error) {
     if (error.message === "Authentication required.") {
       window.location.replace("/");
@@ -259,6 +343,8 @@ async function refreshOperations() {
     ]);
     renderOperations(operations);
     renderUsers(users.users);
+    const analytics = await loadMvpAnalytics();
+    renderSmartOperations(operations, analytics);
   } catch (error) {
     if (error.message === "Authentication required.") {
       window.location.replace("/");
@@ -326,6 +412,25 @@ document.querySelector("#admin-create-form").addEventListener("submit", async (e
   }
 });
 
+document.querySelector("#planning-form").addEventListener("submit", generateProductionPlan);
+
+document.querySelector("#export-impact-report").addEventListener("click", () => {
+  const report = [
+    "ResQmeal sustainability impact report",
+    `Generated: ${new Date().toLocaleString()}`,
+    `Meals rescued: ${document.querySelector("#impact-meals").textContent}`,
+    `Estimated CO2 avoided: ${document.querySelector("#impact-carbon").textContent}`,
+    `Resource efficiency: ${document.querySelector("#impact-efficiency").textContent}`,
+    "Note: carbon figures are planning estimates until verified meter data is connected.",
+  ].join("\n");
+  const blob = new Blob([report], { type: "text/plain;charset=utf-8" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `resqmeal-impact-${new Date().toISOString().slice(0, 10)}.txt`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+});
+
 document.querySelector("#matchingTableBody").addEventListener("click", async (event) => {
   const batchDetailsId = event.target.dataset.batchDetails;
   if (batchDetailsId) {
@@ -338,7 +443,8 @@ document.querySelector("#matchingTableBody").addEventListener("click", async (ev
   if (!batchId) return;
   const row = event.target.closest("tr");
   const requirementId = row.querySelector(".requirement-select").value;
-  if (!requirementId) {
+  const batch = window.adminBatches.find((item) => String(item.id) === batchId);
+  if (!requirementId && !batch?.assigned_ngo_id) {
     setStatus("Choose a matching NGO requirement before assigning the batch.", true);
     return;
   }

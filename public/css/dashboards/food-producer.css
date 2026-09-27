@@ -2,6 +2,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   overflow-x: hidden;
@@ -394,6 +398,120 @@ input:focus, select:focus {
   gap: 0.65rem;
 }
 
+.menu-toggle {
+  display: inline-grid;
+  width: 2.45rem;
+  height: 2.45rem;
+  place-items: center;
+  padding: 0 0 0.55rem;
+  border: 1px solid #dce5df;
+  border-radius: 50%;
+  color: #205c48;
+  background: #ffffff;
+  font: inherit;
+  font-size: 1.25rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+}
+
+.menu-toggle:hover,
+.menu-toggle[aria-expanded=true] {
+  border-color: #2f7d61;
+  color: #ffffff;
+  background: #2f7d61;
+}
+
+.menu-toggle:focus-visible {
+  outline: 3px solid rgba(47, 125, 97, 0.2);
+  outline-offset: 2px;
+}
+
+.account-menu {
+  position: absolute;
+  top: calc(100% + 0.65rem);
+  right: 0;
+  z-index: 20;
+  display: grid;
+  min-width: 12rem;
+  padding: 0.45rem;
+  border: 1px solid #dce5df;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  box-shadow: 0 1rem 2.5rem rgba(25, 53, 45, 0.15);
+}
+
+.account-menu[hidden] {
+  display: none;
+}
+
+.menu-item {
+  width: 100%;
+  padding: 0.7rem 0.75rem;
+  border: 0;
+  color: #19352d;
+  background: transparent;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 750;
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu-item:hover,
+.menu-item:focus-visible {
+  border-radius: 0.45rem;
+  color: #205c48;
+  background: #eef5ef;
+  outline: 0;
+}
+
+.account-menu .header-profile-panel {
+  position: static;
+  display: flex;
+  min-width: 18rem;
+  margin-top: 0.35rem;
+  padding: 0.75rem 0 0;
+  border: 0;
+  border-top: 1px solid #dce5df;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.account-menu .header-profile-panel[hidden] {
+  display: none;
+}
+
+.dashboard-nav-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.38rem 0.7rem;
+  border: 1px solid #dce5df;
+  border-radius: 0.35rem;
+  color: #205c48;
+  background: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 750;
+  transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
+  text-decoration: none;
+}
+
+.dashboard-nav-link:hover,
+.dashboard-nav-link:focus-visible,
+.dashboard-nav-link.active {
+  border-color: #2f7d61;
+  color: #205c48;
+  background: #eef5ef;
+  outline: 0;
+}
+
+.dashboard-nav-link:focus-visible {
+  outline: 3px solid rgba(47, 125, 97, 0.2);
+  outline-offset: 2px;
+}
+
 .dashboard-actions .outline-button,
 .user-meta .outline-button,
 .user-section .outline-button {
@@ -758,6 +876,7 @@ input:focus, select:focus {
   outline: 0;
 }
 .food-producer-dashboard #producer-overview,
+.food-producer-dashboard #producer-planning,
 .food-producer-dashboard #producer-tools,
 .food-producer-dashboard #producer-stock,
 .food-producer-dashboard #producer-surplus,
@@ -1342,6 +1461,154 @@ input:focus, select:focus {
   object-fit: cover;
   background: #17251f;
 }
+.food-producer-dashboard .producer-insights {
+  order: 2;
+  margin: 0 0 1.25rem;
+}
+.food-producer-dashboard .insight-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.food-producer-dashboard .insight-heading h2 {
+  margin: 0.2rem 0 0.35rem;
+  font-size: 1.35rem;
+}
+.food-producer-dashboard .insight-heading p:last-child {
+  margin: 0;
+  color: #70827b;
+  font-size: 0.82rem;
+}
+.food-producer-dashboard .insight-updated {
+  color: #70827b;
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+.food-producer-dashboard .planning-grid,
+.food-producer-dashboard .alert-metric-grid {
+  display: grid;
+  grid-template-columns: 1.5fr repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.food-producer-dashboard .metric-card,
+.food-producer-dashboard .planning-card,
+.food-producer-dashboard .alert-card,
+.food-producer-dashboard .resource-card,
+.food-producer-dashboard .sustainability-card {
+  min-height: 9rem;
+}
+.food-producer-dashboard .planning-card h3,
+.food-producer-dashboard .alert-card h3 {
+  margin: 0.2rem 0 0.45rem;
+  font-size: 1rem;
+}
+.food-producer-dashboard .planning-card > strong {
+  display: block;
+  color: #205c48;
+  font-size: 1rem;
+  line-height: 1.35;
+}
+.food-producer-dashboard .planning-card > p:not(.eyebrow) {
+  min-height: 2.4rem;
+  margin: 0.45rem 0 0.8rem;
+  color: #70827b;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+.food-producer-dashboard .metric-card > span {
+  display: block;
+  color: #70827b;
+  font-size: 0.75rem;
+}
+.food-producer-dashboard .metric-card > strong {
+  display: block;
+  margin: 0.7rem 0 0.25rem;
+  color: #19352d;
+  font-size: 1.65rem;
+}
+.food-producer-dashboard .metric-card > small {
+  color: #70827b;
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+.food-producer-dashboard .progress-track {
+  height: 0.45rem;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: #e8eee9;
+}
+.food-producer-dashboard .progress-track span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: #2f7d61;
+  transition: width 300ms ease;
+}
+.food-producer-dashboard .planning-card small {
+  display: block;
+  margin-top: 0.4rem;
+  color: #70827b;
+  font-size: 0.7rem;
+}
+.food-producer-dashboard .alert-card {
+  border-left: 4px solid #8ac59a;
+}
+.food-producer-dashboard .alert-card.has-alert {
+  border-left-color: #d6953d;
+  background: #fffaf0;
+}
+.food-producer-dashboard .alert-card p:not(.eyebrow), .food-producer-dashboard .resource-card > p:last-child, .food-producer-dashboard .sustainability-card > p:last-child {
+  color: #70827b;
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+.food-producer-dashboard .insight-action {
+  margin-top: 0.3rem;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.72rem;
+}
+.food-producer-dashboard .resource-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid #edf1ee;
+  color: #70827b;
+  font-size: 0.76rem;
+}
+.food-producer-dashboard .resource-row strong {
+  color: #205c48;
+}
+.food-producer-dashboard .sustainability-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin: 0.7rem 0 0.3rem;
+}
+.food-producer-dashboard .sustainability-stats strong, .food-producer-dashboard .sustainability-stats span {
+  display: block;
+}
+.food-producer-dashboard .sustainability-stats strong {
+  color: #205c48;
+  font-size: 1.2rem;
+}
+.food-producer-dashboard .sustainability-stats span {
+  color: #70827b;
+  font-size: 0.65rem;
+}
+.food-producer-dashboard .main-grid {
+  order: 3;
+}
+.food-producer-dashboard .inventory-panel {
+  order: 4;
+}
+.food-producer-dashboard .producer-tools-grid {
+  order: 5;
+}
 @media (max-width: 1024px) {
   .food-producer-dashboard .topbar {
     align-items: flex-start;
@@ -1366,7 +1633,16 @@ input:focus, select:focus {
     gap: 1rem;
   }
   .food-producer-dashboard .producer-tools-grid {
-    order: 4;
+    order: 5;
+  }
+  .food-producer-dashboard .planning-grid,
+  .food-producer-dashboard .alert-metric-grid {
+    grid-template-columns: 1fr;
+  }
+  .food-producer-dashboard .insight-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.35rem;
   }
   .food-producer-dashboard .inventory-toolbar,
   .food-producer-dashboard .add-stock-heading {
@@ -1383,6 +1659,7 @@ input:focus, select:focus {
     width: min(100% - 2rem, 76rem);
   }
   .food-producer-dashboard #producer-overview,
+  .food-producer-dashboard #producer-planning,
   .food-producer-dashboard #producer-tools,
   .food-producer-dashboard #producer-stock,
   .food-producer-dashboard #producer-surplus,

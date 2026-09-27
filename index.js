@@ -36,6 +36,79 @@ async function requestPythonAi(path, body) {
   }
 }
 
+async function automaticallyAssignNgo(batch) {
+  const candidates = await pool.query(
+    `SELECT r.id, r.ngo_id, r.food_category, r.servings, r.needed_by,
+            u.latitude AS ngo_latitude, u.longitude AS ngo_longitude,
+            EXTRACT(EPOCH FROM (r.needed_by - NOW())) / 3600 AS hours_until_needed
+     FROM food_requirements r
+     JOIN users u ON u.id = r.ngo_id
+     WHERE r.status = 'Open'
+     ORDER BY r.needed_by ASC
+     LIMIT 100`,
+  );
+  const recommendation = await requestPythonAi("/assign-ngo", {
+    batch: {
+      food_category: batch.food_category,
+      quantity_value: batch.quantity_value,
+      source_latitude: batch.source_latitude,
+      source_longitude: batch.source_longitude,
+    },
+    requirements: candidates.rows,
+  });
+  if (!recommendation.available || !recommendation.assigned || !recommendation.match?.requirementId) {
+    return { assigned: false, reason: recommendation.error || "No compatible NGO requirement was found." };
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const requirement = await client.query(
+      `SELECT r.id, r.ngo_id, u.email AS ngo_email, u.display_name AS ngo_name
+       FROM food_requirements r
+       JOIN users u ON u.id = r.ngo_id
+       WHERE r.id = $1 AND r.status = 'Open'
+       FOR UPDATE`,
+      [recommendation.match.requirementId],
+    );
+    if (!requirement.rows[0]) {
+      await client.query("ROLLBACK");
+      return { assigned: false, reason: "The recommended NGO requirement was already assigned." };
+    }
+    const updated = await client.query(
+      `UPDATE food_batches
+       SET assigned_ngo_id = $1, assigned_shelter = $2,
+           assignment_distance_km = $3, assignment_reason = $4
+       WHERE id = $5 AND status = 'Awaiting Pickup' AND assigned_ngo_id IS NULL
+       RETURNING id, batch_code, assigned_ngo_id, assigned_shelter`,
+      [
+        requirement.rows[0].ngo_id,
+        requirement.rows[0].ngo_name || requirement.rows[0].ngo_email,
+        recommendation.match.distanceKm,
+        recommendation.match.reason,
+        batch.id,
+      ],
+    );
+    if (!updated.rows[0]) {
+      await client.query("ROLLBACK");
+      return { assigned: false, reason: "The batch is no longer awaiting pickup." };
+    }
+    await client.query("UPDATE food_requirements SET status = 'Fulfilled' WHERE id = $1", [requirement.rows[0].id]);
+    await client.query("COMMIT");
+    return {
+      assigned: true,
+      batch: updated.rows[0],
+      distanceKm: recommendation.match.distanceKm,
+      reason: recommendation.match.reason,
+    };
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (origin && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
@@ -328,6 +401,7 @@ app.get("/api/admin/operations", async (req, res, next) => {
       pool.query(
         `SELECT b.id, b.batch_code, b.food_description, b.food_category, b.quantity,
                 b.quantity_value, b.status, b.assigned_shelter, b.assigned_ngo_id,
+                b.assignment_distance_km, b.assignment_reason,
                 b.delivery_partner_id, b.created_at, u.email AS producer_email,
                 u.display_name AS producer_name, u.location_address AS producer_address,
                 u.latitude AS source_lat, u.longitude AS source_lng,
@@ -404,11 +478,18 @@ app.patch("/api/admin/operations/:id", async (req, res, next) => {
         await client.query("ROLLBACK");
         return res.status(404).json({ error: "Batch not found or already delivered." });
       }
+      const autoAssignedNgo = !Number.isInteger(requirementId) && batch.rows[0].assigned_ngo_id;
       const requirement = Number.isInteger(requirementId)
         ? await client.query(
           `SELECT r.*, u.email AS ngo_email, u.display_name AS ngo_name FROM food_requirements r
            JOIN users u ON u.id = r.ngo_id WHERE r.id = $1 AND r.status = 'Open'`,
           [requirementId],
+        )
+        : autoAssignedNgo
+        ? await client.query(
+          `SELECT NULL AS id, u.id AS ngo_id, u.email AS ngo_email, u.display_name AS ngo_name
+           FROM users u WHERE u.id = $1 AND u.role = 'NGO'`,
+          [batch.rows[0].assigned_ngo_id],
         )
         : await client.query(
           `SELECT r.*, u.email AS ngo_email, u.display_name AS ngo_name FROM food_requirements r
@@ -432,12 +513,14 @@ app.patch("/api/admin/operations/:id", async (req, res, next) => {
       const result = await client.query(
         `UPDATE food_batches
          SET assigned_ngo_id = $1, assigned_shelter = $2, delivery_partner_id = $3,
-             delivery_otp = $4
+             delivery_otp = $4, assignment_reason = COALESCE(assignment_reason, 'Assigned manually by an administrator.')
          WHERE id = $5 AND status = 'Awaiting Pickup'
          RETURNING id, batch_code, assigned_ngo_id, delivery_partner_id, status`,
         [requirement.rows[0].ngo_id, requirement.rows[0].ngo_name || requirement.rows[0].ngo_email, driver.rows[0].id, deliveryOtp, batchId],
       );
-      await client.query("UPDATE food_requirements SET status = 'Fulfilled' WHERE id = $1", [requirement.rows[0].id]);
+      if (requirement.rows[0].id) {
+        await client.query("UPDATE food_requirements SET status = 'Fulfilled' WHERE id = $1", [requirement.rows[0].id]);
+      }
       await client.query("COMMIT");
       return res.json({ batch: result.rows[0] });
     } catch (error) {
@@ -449,6 +532,26 @@ app.patch("/api/admin/operations/:id", async (req, res, next) => {
   } catch (error) {
     return next(error);
   }
+});
+
+app.get("/api/admin/analytics", async (req, res, next) => {
+  try {
+    if (!await requireAdmin(req, res)) return;
+    const [expiry, sensors, impact] = await Promise.all([
+      pool.query(`SELECT id, item_name, category, quantity, unit, expires_on,
+                         (expires_on - CURRENT_DATE) AS days_until_expiry
+                  FROM producer_inventory
+                  WHERE expires_on <= CURRENT_DATE + 3 ORDER BY expires_on ASC LIMIT 100`),
+      pool.query(`SELECT COUNT(*)::INTEGER AS readings,
+                         COUNT(*) FILTER (WHERE temperature_c > 5 OR humidity_percent > 65)::INTEGER AS unsafe
+                  FROM iot_readings WHERE recorded_at >= NOW() - INTERVAL '7 days'`),
+      pool.query(`SELECT COALESCE(SUM(quantity_value) FILTER (WHERE status = 'Delivered'), 0) AS rescued_servings,
+                         COUNT(*) FILTER (WHERE status = 'Delivered')::INTEGER AS delivered_batches,
+                         COUNT(*)::INTEGER AS total_batches
+                  FROM food_batches`),
+    ]);
+    return res.json({ expiryAlerts: expiry.rows, sensorHealth: sensors.rows[0], impact: impact.rows[0] });
+  } catch (error) { return next(error); }
 });
 
 app.get("/api/delivery/dashboard", async (req, res, next) => {
@@ -512,11 +615,47 @@ app.patch("/api/delivery/batches/:id", async (req, res, next) => {
   }
 });
 
+app.get("/api/delivery/batches/:id/route", async (req, res, next) => {
+  const batchId = Number(req.params.id);
+  if (!Number.isInteger(batchId)) return res.status(400).json({ error: "Invalid batch id." });
+  try {
+    const session = await requireRole(req, res, "delivery partner");
+    if (!session) return;
+    const batch = await pool.query(
+      `SELECT b.id, b.batch_code, u.display_name AS producer_name, u.location_address AS producer_address,
+              u.latitude AS source_lat, u.longitude AS source_lng,
+              n.display_name AS ngo_name, n.location_address AS ngo_address,
+              n.latitude AS destination_lat, n.longitude AS destination_lng
+       FROM food_batches b JOIN users u ON u.id = b.producer_id
+       LEFT JOIN users n ON n.id = b.assigned_ngo_id
+       WHERE b.id = $1 AND b.delivery_partner_id = $2`,
+      [batchId, session.id],
+    );
+    if (!batch.rows[0]) return res.status(404).json({ error: "Route assignment not found." });
+    const item = batch.rows[0];
+    const route = await requestPythonAi("/route-plan", { stops: [
+      { type: "pickup", label: item.producer_name || item.producer_address || "Producer",
+        latitude: item.source_lat, longitude: item.source_lng },
+      { type: "dropoff", label: item.ngo_name || item.ngo_address || "NGO",
+        latitude: item.destination_lat, longitude: item.destination_lng },
+    ] });
+    if (route.available) {
+      await pool.query(
+        `INSERT INTO route_plans (batch_id, delivery_partner_id, distance_km, duration_minutes, waypoints, provider)
+         VALUES ($1, $2, $3, $4, $5::jsonb, $6)`,
+        [batchId, session.id, route.distanceKm || null, route.durationMinutes || null,
+          JSON.stringify(route.stops || []), route.provider || "simulated"],
+      );
+    }
+    return res.json({ batch: item, route });
+  } catch (error) { return next(error); }
+});
+
 app.get("/api/food-producer/dashboard", async (req, res, next) => {
   try {
     const session = await requireRole(req, res, "FoodProducer");
     if (!session) return;
-    const [batches, summary, inventory] = await Promise.all([
+    const [batches, summary, inventory, readings, qualityImages] = await Promise.all([
       pool.query(
         `SELECT id, batch_code, food_description, food_category, waste_type, quantity, preparation_time,
                 status, release_otp, created_at
@@ -540,11 +679,64 @@ app.get("/api/food-producer/dashboard", async (req, res, next) => {
          FROM producer_inventory WHERE producer_id = $1 ORDER BY expires_on ASC, created_at DESC`,
         [session.id],
       ),
+      pool.query(
+        `SELECT DISTINCT ON (sensor_id) id, sensor_id, temperature_c, humidity_percent,
+                reading_source, recorded_at
+         FROM iot_readings WHERE producer_id = $1
+         ORDER BY sensor_id, recorded_at DESC`,
+        [session.id],
+      ),
+      pool.query(
+        `SELECT id, batch_id, file_name, mime_type, quality_score, detected_labels, notes, created_at
+         FROM quality_image_records WHERE producer_id = $1 ORDER BY created_at DESC LIMIT 20`,
+        [session.id],
+      ),
     ]);
-    return res.json({ profile: session, batches: batches.rows, summary: summary.rows[0], inventory: inventory.rows });
+    return res.json({ profile: session, batches: batches.rows, summary: summary.rows[0],
+      inventory: inventory.rows, readings: readings.rows, qualityImages: qualityImages.rows });
   } catch (error) {
     return next(error);
   }
+});
+
+app.post("/api/food-producer/sensors/readings", async (req, res, next) => {
+  const temperature = Number(req.body.temperatureC);
+  const humidity = Number(req.body.humidityPercent);
+  const source = ["simulated", "manual", "device"].includes(req.body.source) ? req.body.source : "manual";
+  if (!Number.isFinite(temperature) || !Number.isFinite(humidity) || humidity < 0 || humidity > 100) {
+    return res.status(400).json({ error: "Temperature and humidity must be valid values." });
+  }
+  try {
+    const session = await requireRole(req, res, "FoodProducer");
+    if (!session) return;
+    const result = await pool.query(
+      `INSERT INTO iot_readings (producer_id, sensor_id, temperature_c, humidity_percent, reading_source)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING id, sensor_id, temperature_c, humidity_percent, reading_source, recorded_at`,
+      [session.id, String(req.body.sensorId || "manual-sensor").slice(0, 80), temperature, humidity, source],
+    );
+    return res.status(201).json({ reading: result.rows[0], safe: temperature <= 5 && humidity <= 65 });
+  } catch (error) { return next(error); }
+});
+
+app.post("/api/food-producer/quality-images", async (req, res, next) => {
+  const fileName = typeof req.body.fileName === "string" ? req.body.fileName.trim() : "";
+  if (!fileName) return res.status(400).json({ error: "An image file name is required." });
+  try {
+    const session = await requireRole(req, res, "FoodProducer");
+    if (!session) return;
+    const analysis = await requestPythonAi("/quality-check", { file_name: fileName, notes: req.body.notes || "" });
+    const result = await pool.query(
+      `INSERT INTO quality_image_records
+       (producer_id, batch_id, file_name, mime_type, quality_score, detected_labels, notes)
+       VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7)
+       RETURNING id, batch_id, file_name, mime_type, quality_score, detected_labels, notes, created_at`,
+      [session.id, Number.isInteger(Number(req.body.batchId)) ? Number(req.body.batchId) : null,
+        fileName.slice(0, 255), String(req.body.mimeType || "image/jpeg"), analysis.qualityScore || null,
+        JSON.stringify(analysis.detectedLabels || []), String(req.body.notes || "").slice(0, 500) || null],
+    );
+    return res.status(201).json({ image: result.rows[0], analysis });
+  } catch (error) { return next(error); }
 });
 
 app.post("/api/food-producer/batches", async (req, res, next) => {
@@ -568,7 +760,15 @@ app.post("/api/food-producer/batches", async (req, res, next) => {
        RETURNING id, batch_code, food_description, food_category, waste_type, quantity, preparation_time, status, release_otp, created_at`,
       [session.id, description, category, wasteType, quantity, quantityValue, preparationTime, otp],
     );
-    return res.status(201).json({ batch: result.rows[0] });
+    const location = await pool.query(
+      "SELECT latitude AS source_latitude, longitude AS source_longitude FROM users WHERE id = $1",
+      [session.id],
+    );
+    const autoAssignment = await automaticallyAssignNgo({
+      ...result.rows[0],
+      ...location.rows[0],
+    });
+    return res.status(201).json({ batch: autoAssignment.batch || result.rows[0], autoAssignment });
   } catch (error) {
     return next(error);
   }
@@ -742,13 +942,23 @@ app.post("/api/ngo/requirements", async (req, res, next) => {
 });
 
 for (const [role, route] of Object.entries(roles)) {
-  app.get(route, (req, res, next) => {
+  const serveDashboard = (req, res, next) => {
     getSession(req).then((session) => {
       if (!session) return res.redirect("/");
       if (session.role !== role) return res.status(403).send("Forbidden");
       return res.sendFile(`${__dirname}/public/dashboards/${dashboardFiles[role]}`);
     }).catch(next);
-  });
+  };
+  app.get(route, (req, res) => res.redirect(`${route}/overview`));
+  const sectionRoutes = {
+    Admin: ["overview", "operations", "intelligence", "sustainability", "users"],
+    NGO: ["overview", "incoming-food", "marketplace", "post-requirement", "requests"],
+    FoodProducer: ["overview", "planning", "storage-tools", "stock", "surplus", "batches"],
+    "delivery partner": ["overview", "assignments", "route", "verification"],
+  };
+  for (const section of sectionRoutes[role] || []) {
+    app.get(`${route}/${section}`, serveDashboard);
+  }
 }
 
 app.get("/health/db", async (req, res, next) => {

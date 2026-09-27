@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ResQmeal - Food Producer</title>
 
-    <link rel="stylesheet" href="/css/styles.css?v=9">
+    <link rel="stylesheet" href="/css/styles.css?v=12">
     <link rel="stylesheet" href="/css/dashboards/food-producer.css?v=9">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 </head>
@@ -21,17 +21,20 @@
             <div class="brand">
                 <span class="brand-name">ResQmeal</span>
                 <nav class="producer-menu" aria-label="Food producer sections">
-                    <button type="button" data-section-target="producer-overview">Overview</button>
-                    <button type="button" data-section-target="producer-tools">Storage & tools</button>
-                    <button type="button" data-section-target="producer-stock">Current stock</button>
-                    <button type="button" data-section-target="producer-surplus">Surplus food</button>
-                    <button type="button" data-section-target="producer-batches">Active batches</button>
+                    <a class="dashboard-nav-link" data-dashboard-link data-dashboard-home="true" data-dashboard-target="producer-overview" href="/dashboard/food-producer/overview">Home</a>
+                    <a class="dashboard-nav-link" data-dashboard-link data-dashboard-target="producer-planning" href="/dashboard/food-producer/planning">Plan production</a>
+                    <a class="dashboard-nav-link" data-dashboard-link data-dashboard-target="producer-tools" href="/dashboard/food-producer/storage-tools">Storage and tools</a>
+                    <a class="dashboard-nav-link" data-dashboard-link data-dashboard-target="producer-stock" href="/dashboard/food-producer/stock">Check inventory</a>
+                    <a class="dashboard-nav-link" data-dashboard-link data-dashboard-target="producer-surplus" href="/dashboard/food-producer/surplus">Donate surplus food</a>
+                    <a class="dashboard-nav-link" data-dashboard-link data-dashboard-target="producer-batches" href="/dashboard/food-producer/batches">View active batches</a>
                 </nav>
             </div>
 
             <div class="user-section">
-                <button class="profile-button outline-button" id="profile-button" type="button">Profile</button>
-                <button class="logout-btn outline-button" id="logout-button" type="button">Sign out</button>
+                <button class="menu-toggle" id="menu-toggle" type="button" aria-label="Open account menu" aria-expanded="false">•••</button>
+                <div class="account-menu" id="account-menu" hidden>
+                <button class="profile-button menu-item" id="profile-button" type="button">Profile</button>
+                <button class="logout-btn menu-item" id="logout-button" type="button">Sign out</button>
                 <div class="header-profile-panel" id="header-profile-panel" hidden><div class="avatar"
                     id="header-profile-avatar">F</div><div><span class="profile-label">Signed in as</span><strong
                     id="profile-email">Loading...</strong><span id="header-profile-role">FoodProducer</span>
@@ -50,6 +53,7 @@
                         <span id="profile-status" class="form-status" role="status"></span>
                     </form>
                 </div></div>
+                </div>
             </div>
 
         </header>
@@ -117,16 +121,43 @@
 
         </section>
 
+        <section class="producer-insights" id="producer-planning" aria-label="Production planning and sustainability">
+            <div class="insight-heading">
+                <div><p class="eyebrow">Production intelligence</p><h2>Plan smarter, waste less</h2><p>Use current stock and batch activity to focus today's production decisions.</p></div>
+                <span class="insight-updated" id="insight-updated">Calculating from dashboard data</span>
+            </div>
+            <div class="planning-grid">
+                <article class="panel planning-card">
+                    <p class="eyebrow">Demand & production plan</p><h3>Recommended next step</h3>
+                    <strong id="planning-recommendation">Review today's demand</strong>
+                    <p id="planning-detail">We will compare active batches with stock and recent production.</p>
+                    <div class="progress-track"><span id="planning-progress"></span></div>
+                    <small id="planning-progress-label">Demand coverage: --</small>
+                </article>
+                <article class="panel metric-card">
+                    <span>Surplus risk (next 24h)</span><strong id="surplus-risk">--</strong><small id="surplus-risk-detail">Based on pending batches and expiring stock</small>
+                </article>
+                <article class="panel metric-card">
+                    <span>Processing efficiency</span><strong id="processing-efficiency">--</strong><small id="processing-efficiency-detail">Delivered meals from uploaded batches</small>
+                </article>
+            </div>
+            <div class="alert-metric-grid">
+                <article class="panel alert-card" id="expiry-alert-card"><p class="eyebrow">Expiry & quality alerts</p><h3 id="expiry-alert-title">No urgent alerts</h3><p id="expiry-alert-detail">Expiry and storage signals will appear here.</p><a class="outline-button insight-action" href="/dashboard/food-producer/stock">Review stock</a></article>
+                <article class="panel resource-card"><p class="eyebrow">Resources & energy</p><div class="resource-row"><span>Cold storage health</span><strong id="energy-health">--</strong></div><div class="resource-row"><span>Estimated energy load</span><strong id="energy-load">--</strong></div><p id="resource-detail">Calculated from the latest temperature and humidity reading.</p></article>
+                <article class="panel sustainability-card"><p class="eyebrow">Sustainability snapshot</p><div class="sustainability-stats"><div><strong id="sustainability-meals">0</strong><span>meals diverted</span></div><div><strong id="sustainability-kg">0</strong><span>kg food saved*</span></div><div><strong id="sustainability-rate">0%</strong><span>recovery rate</span></div></div><p>*Estimated from servings and available inventory units.</p></article>
+            </div>
+        </section>
+
         <section class="producer-tools-grid" id="producer-tools">
             <article class="panel producer-tool">
                 <p class="eyebrow">Smart storage</p>
                 <h2>Storage conditions using IoT</h2>
                 <p class="tool-intro">Monitor temperature and humidity to protect food quality, improve energy efficiency, and reduce machine downtime.</p>
                 <div class="sensor-reading-grid">
-                    <div class="sensor-reading"><span>Temperature</span><strong id="storage-temperature">--</strong><small id="temperature-status">Waiting for sensor</small></div>
-                    <div class="sensor-reading"><span>Humidity</span><strong id="storage-humidity">--</strong><small id="humidity-status">Waiting for sensor</small></div>
+                    <div class="sensor-reading"><span>Temperature</span><strong id="storage-temperature">4.2°C</strong><small id="temperature-status">Demo reading</small></div>
+                    <div class="sensor-reading"><span>Humidity</span><strong id="storage-humidity">58%</strong><small id="humidity-status">Demo reading</small></div>
                 </div>
-                <div class="storage-health" id="storage-health">Connect an IoT sensor to view live storage health.</div>
+                <div class="storage-health" id="storage-health">Demo storage health: Good. Replace with a real IoT reading when connected.</div>
                 <button class="outline-button tool-button" id="simulate-sensor" type="button">Refresh sensor reading</button>
             </article>
             <article class="panel producer-tool">
@@ -461,6 +492,7 @@
     </div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" defer></script>
     <script src="/js/location-picker.js?v=1" defer></script>
+    <script src="/js/dashboard-navigation.js?v=5" defer></script>
     <script src="/js/dashboards/food-producer.js?v=15" defer></script>
 
 </body>

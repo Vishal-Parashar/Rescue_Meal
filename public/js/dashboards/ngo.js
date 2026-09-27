@@ -14,7 +14,27 @@ document.querySelectorAll("[data-section-target]").forEach((button) => {
     document.querySelectorAll("[data-section-target]").forEach((menuButton) => {
       menuButton.classList.toggle("active", menuButton === button);
     });
+
   });
+});
+
+const menuToggle = document.querySelector("#menu-toggle");
+const accountMenu = document.querySelector("#account-menu");
+menuToggle.addEventListener("click", () => {
+  accountMenu.hidden = !accountMenu.hidden;
+  menuToggle.setAttribute("aria-expanded", String(!accountMenu.hidden));
+});
+document.addEventListener("click", (event) => {
+  if (!accountMenu.hidden && !accountMenu.contains(event.target) && event.target !== menuToggle) {
+    accountMenu.hidden = true;
+    menuToggle.setAttribute("aria-expanded", "false");
+  }
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    accountMenu.hidden = true;
+    menuToggle.setAttribute("aria-expanded", "false");
+  }
 });
 
 if (isLocalhost && !isExpressDashboard) {

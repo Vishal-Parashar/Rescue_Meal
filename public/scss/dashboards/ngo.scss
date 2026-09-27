@@ -15,16 +15,25 @@
   }
 
   .dashboard-header {
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 50%;
     z-index: 10;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
+    width: min(100% - 3rem, 76rem);
     padding: .8rem 0 1rem;
     border-bottom: 1px solid $line;
     background: $cream;
+    transform: translateX(-50%);
+  }
+
+  .dashboard-shell::before {
+    display: block;
+    height: 5.25rem;
+    content: "";
   }
 
   .ngo-brand {
@@ -46,7 +55,7 @@
     gap: .35rem;
   }
 
-  .ngo-menu button {
+  .ngo-menu .dashboard-nav-link {
     min-height: 2rem;
     padding: .38rem .7rem;
     border: 1px solid $line;
@@ -56,13 +65,13 @@
     font: inherit;
     font-size: .72rem;
     font-weight: 750;
-    cursor: pointer;
+    white-space: nowrap;
     transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
   }
 
-  .ngo-menu button:hover,
-  .ngo-menu button:focus-visible,
-  .ngo-menu button.active {
+  .ngo-menu .dashboard-nav-link:hover,
+  .ngo-menu .dashboard-nav-link:focus-visible,
+  .ngo-menu .dashboard-nav-link.active {
     border-color: $green;
     color: $white;
     background: $green;
@@ -305,9 +314,11 @@
 
   @media (max-width: 1024px) {
     .dashboard-shell { width: min(100% - 2rem, 76rem); }
-    .dashboard-header { align-items: flex-start; flex-direction: column; padding-bottom: 1rem; }
-    .dashboard-actions { width: 100%; justify-content: space-between; }
-    .ngo-menu { max-width: 100%; }
+    .dashboard-header { align-items: center; flex-direction: row; padding-bottom: .8rem; }
+    .dashboard-shell::before { height: 5.25rem; }
+    .ngo-brand { flex-direction: row; align-items: center; gap: .8rem; flex: 1 1 auto; }
+    .dashboard-actions { width: auto; justify-content: flex-end; }
+    .ngo-menu { flex-wrap: nowrap; max-width: 100%; overflow-x: auto; padding-bottom: .15rem; }
     .dashboard-hero { align-items: stretch; flex-direction: column; padding-top: 1.5rem; }
     .profile-card { width: 100%; }
     .ngo-grid {
@@ -356,15 +367,15 @@
       max-width: 100%;
     }
 
-    .ngo-menu {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      width: 100%;
+    .dashboard-header {
+      width: calc(100% - 1.25rem);
     }
 
-    .ngo-menu button {
-      text-align: center;
-    }
+    .dashboard-header { align-items: flex-start; flex-direction: column; gap: .75rem; }
+    .dashboard-shell::before { height: 11.5rem; }
+    .ngo-brand { flex-direction: column; align-items: flex-start; width: 100%; }
+    .ngo-menu { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; overflow: visible; }
+    .ngo-menu .dashboard-nav-link { justify-content: center; text-align: center; white-space: normal; }
 
     .dashboard-actions {
       justify-content: flex-start;

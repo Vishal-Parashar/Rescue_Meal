@@ -53,16 +53,17 @@ Open this address in your browser:
 
 Do not open the HTML files directly. Always use the address above.
 
-## Run the AI service (optional)
+## Run the AI service
 
-The website works without the AI service. Start it if you want forecasting and
-matching recommendations.
+The AI service performs automatic NGO assignment when a producer submits a
+batch. It matches food category and serving capacity, then ranks eligible NGO
+requirements using great-circle distance, urgency, and capacity fit. Keep this
+service running for automatic assignment; the admin dashboard remains
+available for manual fallback assignment.
 
 Open a **second PowerShell window** and run:
 
 ```powershell
-py -m venv .venv
-.\.venv\Scripts\Activate.ps1
 python -m pip install -r ai_service\requirements.txt
 npm run start-ai
 ```

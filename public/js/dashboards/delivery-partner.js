@@ -1,4 +1,23 @@
 const logoutButton = document.querySelector("#logout-button");
+const menuToggle = document.querySelector("#menu-toggle");
+const accountMenu = document.querySelector("#account-menu");
+menuToggle.addEventListener("click", () => {
+  accountMenu.hidden = !accountMenu.hidden;
+  menuToggle.setAttribute("aria-expanded", String(!accountMenu.hidden));
+});
+document.addEventListener("click", (event) => {
+  if (!accountMenu.hidden && !accountMenu.contains(event.target) && event.target !== menuToggle) {
+    accountMenu.hidden = true;
+    menuToggle.setAttribute("aria-expanded", "false");
+  }
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    accountMenu.hidden = true;
+    menuToggle.setAttribute("aria-expanded", "false");
+  }
+});
+
 logoutButton.addEventListener("click", async () => {
   logoutButton.disabled = true;
   try {
@@ -53,6 +72,19 @@ function updateOtpInstructions() {
     button.textContent = "Verify OTP";
     return;
   }
+
+  async function loadRoutePlan(batchId) {
+    if (!batchId) return;
+    try {
+      const result = await request(`/api/delivery/batches/${batchId}/route`);
+      const route = result.route || {};
+      document.querySelector("#map-status").textContent = route.available
+        ? `Simulated route · ${route.distanceKm || 0} km · ${route.durationMinutes || 0} min`
+        : "Route unavailable";
+    } catch (error) {
+      document.querySelector("#map-status").textContent = error.message;
+    }
+  }
   source.textContent = assignment.producer_address
     ? `${assignment.producer_name || assignment.producer_email} · ${assignment.producer_address}`
     : (assignment.producer_name || assignment.producer_email);
@@ -77,6 +109,7 @@ function renderAssignments() {
     : '<option value="">No active assignments</option>';
   batchSelect.disabled = !assignments.length;
   updateOtpInstructions();
+  loadRoutePlan(batchSelect.value);
   window.dispatchEvent(new CustomEvent("resqmeal:assignments", { detail: assignments }));
   if (!assignments.length) {
     assignmentList.innerHTML = '<p class="empty-state">No active assignments. Admin assignments will appear here.</p>';
@@ -174,7 +207,10 @@ document.querySelector(".btn-verify").addEventListener("click", async () => {
   }
 });
 
-document.querySelector("#active-batch").addEventListener("change", updateOtpInstructions);
+document.querySelector("#active-batch").addEventListener("change", () => {
+  updateOtpInstructions();
+  loadRoutePlan(document.querySelector("#active-batch").value);
+});
 
 loadDashboard().catch((error) => {
   deliveryStatus.textContent = error.message;

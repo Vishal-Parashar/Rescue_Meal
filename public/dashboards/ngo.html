@@ -5,25 +5,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NGO dashboard | resQmeal</title>
-    <link rel="stylesheet" href="/css/styles.css?v=11">
+    <link rel="stylesheet" href="/css/styles.css?v=12">
     <link rel="stylesheet" href="/css/dashboards/ngo.css?v=10">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 </head>
 
 <body class="dashboard-page ngo-dashboard">
     <main class="dashboard-shell">
-        <header class="dashboard-header"><div class="ngo-brand"><a class="brand" href="/"><span
+        <header class="dashboard-header"><div class="ngo-brand"><a class="brand" href="/dashboard/ngo/overview"><span
                     class="brand-mark">r</span><span>resQmeal</span></a>
                 <nav class="ngo-menu" aria-label="NGO dashboard sections">
-                    <button type="button" data-section-target="ngo-overview">Overview</button>
-                    <button type="button" data-section-target="ngo-deliveries-section">Incoming food</button>
-                    <button type="button" data-section-target="ngo-marketplace">Marketplace</button>
-                    <button type="button" data-section-target="ngo-post-requirement">Post requirement</button>
-                    <button type="button" data-section-target="ngo-requirements">Your requests</button>
+                    <a class="dashboard-nav-link" data-dashboard-link data-dashboard-home="true" data-dashboard-target="ngo-overview" href="/dashboard/ngo/overview">Home</a>
+                    <a class="dashboard-nav-link" data-dashboard-link data-dashboard-target="ngo-deliveries-section" href="/dashboard/ngo/incoming-food">View incoming food</a>
+                    <a class="dashboard-nav-link" data-dashboard-link data-dashboard-target="ngo-marketplace" href="/dashboard/ngo/marketplace">Find available food</a>
+                    <a class="dashboard-nav-link" data-dashboard-link data-dashboard-target="ngo-post-requirement" href="/dashboard/ngo/post-requirement">Request food</a>
+                    <a class="dashboard-nav-link" data-dashboard-link data-dashboard-target="ngo-requirements" href="/dashboard/ngo/requests">Track my requests</a>
                 </nav>
             </div>
-            <div class="dashboard-actions"><button class="outline-button profile-button" id="profile-button"
-                    type="button">Profile</button><button class="outline-button" id="logout-button" type="button">Sign
+            <div class="dashboard-actions"><button class="menu-toggle" id="menu-toggle" type="button"
+                    aria-label="Open account menu" aria-expanded="false">•••</button><div class="account-menu" id="account-menu" hidden><button class="profile-button menu-item" id="profile-button"
+                    type="button">Profile</button><button class="menu-item" id="logout-button" type="button">Sign
                     out</button>
                 <div class="header-profile-panel" id="header-profile-panel" hidden>
                     <div class="avatar" id="header-profile-avatar">N</div>
@@ -43,7 +44,7 @@
                                 <button type="submit" class="outline-button">Save name</button>
                                 <span id="profile-status" class="form-status" role="status"></span>
                             </form>
-                </div>
+                    </div></div>
                 </div>
             </div>
         </header>
@@ -131,6 +132,7 @@
     </div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" defer></script>
     <script src="/js/location-picker.js?v=1" defer></script>
+    <script src="/js/dashboard-navigation.js?v=5" defer></script>
     <script src="/js/dashboards/ngo.js?v=10" defer></script>
 </body>
 

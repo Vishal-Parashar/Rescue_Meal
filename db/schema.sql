@@ -63,6 +63,8 @@ ALTER TABLE food_batches ADD CONSTRAINT food_batches_status_check
   CHECK (status IN ('Awaiting Pickup', 'Picked Up', 'Delivered'));
 ALTER TABLE food_batches ADD COLUMN IF NOT EXISTS delivery_otp CHAR(4);
 ALTER TABLE food_batches ADD COLUMN IF NOT EXISTS assigned_ngo_id BIGINT REFERENCES users(id) ON DELETE SET NULL;
+ALTER TABLE food_batches ADD COLUMN IF NOT EXISTS assignment_distance_km NUMERIC(8, 2);
+ALTER TABLE food_batches ADD COLUMN IF NOT EXISTS assignment_reason TEXT;
 ALTER TABLE food_batches ADD COLUMN IF NOT EXISTS delivery_partner_id BIGINT REFERENCES users(id) ON DELETE SET NULL;
 ALTER TABLE food_batches ADD COLUMN IF NOT EXISTS pickup_verified_at TIMESTAMPTZ;
 ALTER TABLE food_batches ADD COLUMN IF NOT EXISTS delivered_at TIMESTAMPTZ;
@@ -91,3 +93,46 @@ CREATE TABLE IF NOT EXISTS food_requirements (
     CHECK (status IN ('Open', 'Fulfilled', 'Cancelled')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- MVP telemetry and traceability records. Hardware and CV clients can post
+-- normalized readings/metadata now, then be swapped for real integrations.
+CREATE TABLE IF NOT EXISTS iot_readings (
+  id BIGSERIAL PRIMARY KEY,
+  producer_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  sensor_id TEXT NOT NULL DEFAULT 'manual-sensor',
+  temperature_c NUMERIC(6, 2),
+  humidity_percent NUMERIC(6, 2),
+  reading_source TEXT NOT NULL DEFAULT 'simulated'
+    CHECK (reading_source IN ('simulated', 'manual', 'device')),
+  recorded_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS quality_image_records (
+  id BIGSERIAL PRIMARY KEY,
+  producer_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  batch_id BIGINT REFERENCES food_batches(id) ON DELETE SET NULL,
+  file_name TEXT NOT NULL,
+  mime_type TEXT NOT NULL DEFAULT 'image/jpeg',
+  quality_score NUMERIC(5, 2),
+  detected_labels JSONB NOT NULL DEFAULT '[]'::jsonb,
+  notes TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS route_plans (
+  id BIGSERIAL PRIMARY KEY,
+  batch_id BIGINT NOT NULL REFERENCES food_batches(id) ON DELETE CASCADE,
+  delivery_partner_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  distance_km NUMERIC(8, 2),
+  duration_minutes INTEGER,
+  waypoints JSONB NOT NULL DEFAULT '[]'::jsonb,
+  provider TEXT NOT NULL DEFAULT 'simulated',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS iot_readings_producer_recorded_idx
+  ON iot_readings (producer_id, recorded_at DESC);
+CREATE INDEX IF NOT EXISTS quality_images_producer_created_idx
+  ON quality_image_records (producer_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS route_plans_batch_created_idx
+  ON route_plans (batch_id, created_at DESC);

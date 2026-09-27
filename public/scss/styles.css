@@ -155,7 +155,7 @@ label {
   font-size: 0.78rem;
 }
 
-input[type=email], input[type=password] {
+input[type=email], input[type=password], input[type=text], select {
   width: 100%;
   padding: 0.9rem 1rem;
   border: 1px solid #dce5df;
@@ -167,7 +167,11 @@ input[type=email], input[type=password] {
   transition: border-color 160ms ease, box-shadow 160ms ease;
 }
 
-input:focus {
+select {
+  font: inherit;
+}
+
+input:focus, select:focus {
   border-color: #2f7d61;
   box-shadow: 0 0 0 3px rgba(47, 125, 97, 0.14);
 }
@@ -261,10 +265,42 @@ input:focus {
   }
   .form-panel {
     min-height: 100vh;
-    padding: 1.5rem;
+    padding: 1.25rem;
+    align-items: start;
   }
   .mobile-brand {
     display: inline-flex;
+    margin-bottom: 2.25rem;
+  }
+  .form-card {
+    width: min(100%, 32rem);
+    padding: 0.5rem 0;
+  }
+  .form-intro {
+    margin-bottom: 1.75rem;
+  }
+  .field-heading {
+    gap: 0.75rem;
+  }
+  .field-heading a {
+    white-space: nowrap;
+  }
+}
+@media (min-width: 761px) and (max-width: 1024px) {
+  .auth-shell {
+    grid-template-columns: minmax(260px, 0.8fr) minmax(360px, 1.2fr);
+  }
+  .brand-panel {
+    padding: clamp(1.5rem, 4vw, 3rem);
+  }
+  .brand-message {
+    max-width: 23rem;
+  }
+  h1 {
+    font-size: clamp(2.25rem, 5vw, 3.5rem);
+  }
+  .form-panel {
+    padding: 1.5rem;
   }
 }
 .dashboard-page {
@@ -405,6 +441,93 @@ input:focus {
   margin: 0;
   font-size: 0.7rem;
   text-align: left;
+}
+
+.profile-help {
+  color: #70827b;
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.location-button {
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid #dce5df;
+  border-radius: 0.5rem;
+  color: #205c48;
+  background: #ffffff;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.location-button:hover {
+  border-color: #2f7d61;
+  background: #f3faf4;
+}
+
+.location-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.location-picker-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(25, 53, 45, 0.45);
+}
+
+.location-picker-modal[hidden] {
+  display: none;
+}
+
+.location-picker-card {
+  width: min(100%, 34rem);
+  padding: 1rem;
+  border: 1px solid #dce5df;
+  border-radius: 0.9rem;
+  background: #ffffff;
+  box-shadow: 0 1.5rem 4rem rgba(25, 53, 45, 0.2);
+}
+
+.location-picker-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.location-picker-header h2 {
+  margin-bottom: 0.5rem;
+  font-size: 1.35rem;
+}
+
+.location-picker-close {
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid #dce5df;
+  border-radius: 50%;
+  color: #70827b;
+  background: #ffffff;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.location-map {
+  height: min(55vh, 24rem);
+  min-height: 16rem;
+  margin: 0.75rem 0;
+  overflow: hidden;
+  border-radius: 0.65rem;
+}
+
+.location-picker-card > #confirm-map-location {
+  width: 100%;
 }
 
 /* Shared dashboard visual language */

@@ -2,6 +2,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   overflow-x: hidden;
@@ -392,6 +396,120 @@ input:focus, select:focus {
   display: flex;
   align-items: center;
   gap: 0.65rem;
+}
+
+.menu-toggle {
+  display: inline-grid;
+  width: 2.45rem;
+  height: 2.45rem;
+  place-items: center;
+  padding: 0 0 0.55rem;
+  border: 1px solid #dce5df;
+  border-radius: 50%;
+  color: #205c48;
+  background: #ffffff;
+  font: inherit;
+  font-size: 1.25rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+}
+
+.menu-toggle:hover,
+.menu-toggle[aria-expanded=true] {
+  border-color: #2f7d61;
+  color: #ffffff;
+  background: #2f7d61;
+}
+
+.menu-toggle:focus-visible {
+  outline: 3px solid rgba(47, 125, 97, 0.2);
+  outline-offset: 2px;
+}
+
+.account-menu {
+  position: absolute;
+  top: calc(100% + 0.65rem);
+  right: 0;
+  z-index: 20;
+  display: grid;
+  min-width: 12rem;
+  padding: 0.45rem;
+  border: 1px solid #dce5df;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  box-shadow: 0 1rem 2.5rem rgba(25, 53, 45, 0.15);
+}
+
+.account-menu[hidden] {
+  display: none;
+}
+
+.menu-item {
+  width: 100%;
+  padding: 0.7rem 0.75rem;
+  border: 0;
+  color: #19352d;
+  background: transparent;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 750;
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu-item:hover,
+.menu-item:focus-visible {
+  border-radius: 0.45rem;
+  color: #205c48;
+  background: #eef5ef;
+  outline: 0;
+}
+
+.account-menu .header-profile-panel {
+  position: static;
+  display: flex;
+  min-width: 18rem;
+  margin-top: 0.35rem;
+  padding: 0.75rem 0 0;
+  border: 0;
+  border-top: 1px solid #dce5df;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.account-menu .header-profile-panel[hidden] {
+  display: none;
+}
+
+.dashboard-nav-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.38rem 0.7rem;
+  border: 1px solid #dce5df;
+  border-radius: 0.35rem;
+  color: #205c48;
+  background: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 750;
+  transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
+  text-decoration: none;
+}
+
+.dashboard-nav-link:hover,
+.dashboard-nav-link:focus-visible,
+.dashboard-nav-link.active {
+  border-color: #2f7d61;
+  color: #205c48;
+  background: #eef5ef;
+  outline: 0;
+}
+
+.dashboard-nav-link:focus-visible {
+  outline: 3px solid rgba(47, 125, 97, 0.2);
+  outline-offset: 2px;
 }
 
 .dashboard-actions .outline-button,
